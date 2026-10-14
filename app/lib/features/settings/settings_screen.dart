@@ -7,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../config.dart';
 import '../../data/backup.dart';
+import '../../data/csv_export.dart';
+import '../../data/database.dart';
 import '../../domain/days.dart';
 import '../../providers.dart';
 import '../../widgets/format.dart';
@@ -83,6 +85,17 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => _export(context, ref),
           ),
           ListTile(
+            leading: const Icon(Icons.table_chart_outlined),
+            title: const Text('Tagebuch als CSV'),
+            subtitle: const Text('Für Excel oder LibreOffice'),
+            onTap: () => _exportCsv(context, ref, 'tagebuch', diaryCsv),
+          ),
+          ListTile(
+            leading: const Icon(Icons.show_chart),
+            title: const Text('Gewicht als CSV'),
+            onTap: () => _exportCsv(context, ref, 'gewicht', weightCsv),
+          ),
+          ListTile(
             leading: const Icon(Icons.download),
             title: const Text('Daten importieren'),
             subtitle: const Text('Ersetzt alle Daten auf diesem Gerät durch eine Sicherung.'),
@@ -137,6 +150,26 @@ Future<void> _export(BuildContext context, WidgetRef ref) async {
       mimeType: 'application/json',
     );
     if (saved != null) messenger.showSnackBar(const SnackBar(content: Text('Sicherung gespeichert.')));
+  } catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text('Export fehlgeschlagen: $e')));
+  }
+}
+
+Future<void> _exportCsv(
+  BuildContext context,
+  WidgetRef ref,
+  String name,
+  Future<String> Function(AppDatabase) build,
+) async {
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    final csv = await build(ref.read(databaseProvider));
+    final saved = await FilePicker.saveFile(
+      fileName: 'muscale-$name-${dayKey(today())}.csv',
+      bytes: utf8.encode(csv),
+      mimeType: 'text/csv',
+    );
+    if (saved != null) messenger.showSnackBar(const SnackBar(content: Text('CSV gespeichert.')));
   } catch (e) {
     messenger.showSnackBar(SnackBar(content: Text('Export fehlgeschlagen: $e')));
   }
