@@ -96,3 +96,30 @@ class NutrientTotals {
     return totals;
   }
 }
+
+/// Nährwerte pro 100 g eines Rezepts aus seinen Zutaten (Nährwerte pro 100, Menge) und dem Gewicht des
+/// fertigen Gerichts. Fehlende Angaben einzelner Zutaten zählen als 0; ein Wert ist nur dann unbekannt, wenn ihn
+/// keine Zutat angibt. Einfach/mehrfach ungesättigte Fette nur, wenn alle Zutaten sie angeben – sonst würden die
+/// ungesättigten Fette zu niedrig ausfallen.
+Nutrients recipeNutrientsPer100(List<(Nutrients, double)> ingredients, double totalWeight) {
+  final parts = [for (final (n, amount) in ingredients) n.forAmount(amount)];
+  double? sum(double? Function(Nutrients) field, {bool requireAll = false}) {
+    final values = parts.map(field);
+    if (requireAll && values.any((v) => v == null)) return null;
+    final known = values.whereType<double>();
+    return known.isEmpty ? null : known.reduce((a, b) => a + b) * 100 / totalWeight;
+  }
+
+  return Nutrients(
+    kcal: sum((n) => n.kcal),
+    protein: sum((n) => n.protein),
+    carbs: sum((n) => n.carbs),
+    sugar: sum((n) => n.sugar),
+    fiber: sum((n) => n.fiber),
+    fat: sum((n) => n.fat),
+    saturatedFat: sum((n) => n.saturatedFat),
+    monoUnsaturatedFat: sum((n) => n.monoUnsaturatedFat, requireAll: true),
+    polyUnsaturatedFat: sum((n) => n.polyUnsaturatedFat, requireAll: true),
+    salt: sum((n) => n.salt),
+  );
+}

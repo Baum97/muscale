@@ -7,33 +7,51 @@ import '../../providers.dart';
 import '../../widgets/format.dart';
 import '../scan/scan_screen.dart';
 import 'manual_food_screen.dart';
+import 'recipe_screen.dart';
 import 'search_screen.dart';
 
-/// Einstieg „Essen hinzufügen“: Scannen, manuell eingeben oder aus „Zuletzt gegessen“.
-Future<void> showAddFoodSheet(BuildContext context, {required String day, required Meal meal}) {
-  return showModalBottomSheet(
+/// Einstieg „Essen hinzufügen“: Lebensmittel wählen, dann Menge.
+Future<void> showAddFoodSheet(BuildContext context, {required String day, required Meal meal}) async {
+  final food = await showFoodPicker(context, title: '${meal.label} hinzufügen', offerNewRecipe: true);
+  if (food != null && context.mounted) await showAmountSheet(context, food: food, day: day, meal: meal);
+}
+
+/// Lebensmittel wählen: scannen, suchen, manuell eingeben, Rezepte oder „Zuletzt gegessen“.
+/// [excludeId] blendet ein Lebensmittel aus (das Rezept, das gerade bearbeitet wird).
+Future<Food?> showFoodPicker(
+  BuildContext context, {
+  required String title,
+  bool offerNewRecipe = false,
+  int? excludeId,
+}) {
+  return showModalBottomSheet<Food>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (_) => _AddFoodSheet(day: day, meal: meal),
+    builder: (_) => _FoodPicker(title: title, offerNewRecipe: offerNewRecipe, excludeId: excludeId),
   );
 }
 
-class _AddFoodSheet extends ConsumerWidget {
-  const _AddFoodSheet({required this.day, required this.meal});
-  final String day;
-  final Meal meal;
+class _FoodPicker extends ConsumerWidget {
+  const _FoodPicker({required this.title, required this.offerNewRecipe, required this.excludeId});
+  final String title;
+  final bool offerNewRecipe;
+  final int? excludeId;
 
-  Future<void> _continueWith(BuildContext context, Food? food) async {
-    if (food == null || !context.mounted) return;
-    final navigator = Navigator.of(context);
-    await showAmountSheet(context, food: food, day: day, meal: meal);
-    navigator.pop();
+  /// Führt [open] aus und schließt danach die Auswahl mit dem gewählten Lebensmittel.
+  Future<void> _via(BuildContext context, Future<Food?> Function() open) async {
+    final food = await open();
+    if (food != null && context.mounted) Navigator.of(context).pop(food);
   }
+
+  Future<Food?> _push(BuildContext context, Widget screen) =>
+      Navigator.of(context).push<Food>(MaterialPageRoute(builder: (_) => screen));
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recent = ref.watch(recentFoodsProvider).value ?? const [];
+    bool keep(Food f) => f.id != excludeId;
+    final recipes = (ref.watch(recipesProvider).value ?? const <Food>[]).where(keep).toList();
+    final recent = (ref.watch(recentFoodsProvider).value ?? const <Food>[]).where(keep).toList();
     return DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.6,
@@ -41,47 +59,55 @@ class _AddFoodSheet extends ConsumerWidget {
       builder: (context, controller) => ListView(
         controller: controller,
         children: [
-          ListTile(title: Text('${meal.label} hinzufügen', style: Theme.of(context).textTheme.titleLarge)),
+          ListTile(title: Text(title, style: Theme.of(context).textTheme.titleLarge)),
           ListTile(
             leading: const Icon(Icons.qr_code_scanner),
             title: const Text('Barcode scannen'),
-            onTap: () async {
-              final food = await scanAndLookup(context, ref);
-              if (context.mounted) await _continueWith(context, food);
-            },
+            onTap: () => _via(context, () => scanAndLookup(context, ref)),
           ),
           ListTile(
             leading: const Icon(Icons.search),
             title: const Text('Suchen'),
-            onTap: () async {
-              final food = await Navigator.of(context)
-                  .push<Food>(MaterialPageRoute(builder: (_) => const SearchScreen()));
-              if (context.mounted) await _continueWith(context, food);
-            },
+            onTap: () => _via(context, () => _push(context, const SearchScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.edit_note),
             title: const Text('Manuell eingeben'),
-            onTap: () async {
-              final food = await Navigator.of(context)
-                  .push<Food>(MaterialPageRoute(builder: (_) => const ManualFoodScreen()));
-              if (context.mounted) await _continueWith(context, food);
-            },
+            onTap: () => _via(context, () => _push(context, const ManualFoodScreen())),
           ),
+          if (offerNewRecipe)
+            ListTile(
+              leading: const Icon(Icons.menu_book_outlined),
+              title: const Text('Neues Rezept'),
+              onTap: () => _via(context, () => _push(context, const RecipeScreen())),
+            ),
+          if (recipes.isNotEmpty) ...[
+            const Divider(),
+            const ListTile(dense: true, title: Text('Meine Rezepte')),
+            for (final food in recipes) _FoodTile(food, onTap: () => Navigator.of(context).pop(food)),
+          ],
           if (recent.isNotEmpty) ...[
             const Divider(),
             const ListTile(dense: true, title: Text('Zuletzt gegessen')),
-            for (final food in recent)
-              ListTile(
-                title: Text(food.name),
-                subtitle: Text(
-                  [?food.brand, '${kcal(food.kcal?.round())} / 100 ${food.isLiquid ? 'ml' : 'g'}'].join(' · '),
-                ),
-                onTap: () => _continueWith(context, food),
-              ),
+            for (final food in recent) _FoodTile(food, onTap: () => Navigator.of(context).pop(food)),
           ],
         ],
       ),
+    );
+  }
+}
+
+class _FoodTile extends StatelessWidget {
+  const _FoodTile(this.food, {required this.onTap});
+  final Food food;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(food.name),
+      subtitle: Text([?food.brand, '${kcal(food.kcal?.round())} / 100 ${food.isLiquid ? 'ml' : 'g'}'].join(' · ')),
+      onTap: onTap,
     );
   }
 }

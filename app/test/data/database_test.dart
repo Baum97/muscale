@@ -59,4 +59,65 @@ void main() {
     expect((await db.searchFoods('arla')).map((f) => f.name), ['Skyr Natur']);
     expect(await db.searchFoods('pizza'), isEmpty);
   });
+
+  test('Rezept speichern, bearbeiten und Zutaten laden', () async {
+    final oatsFood = await db.upsertFood(oats());
+    final milk = await db.upsertFood(
+      FoodsCompanion.insert(
+        name: 'Milch',
+        source: FoodSource.custom,
+        isLiquid: const Value(true),
+        kcal: const Value(64),
+      ),
+    );
+    final recipe = await db.saveRecipe(
+      name: 'Porridge',
+      portions: 2,
+      totalWeight: 400,
+      ingredients: [Ingredient(oatsFood, 100), Ingredient(milk, 300)],
+    );
+    expect(recipe.source, FoodSource.recipe);
+    expect(recipe.servingSize, 200);
+    expect(recipe.recipeTotalWeight, 400);
+    expect(recipe.kcal, closeTo((372 + 192) / 4, 1e-9));
+
+    final edited = await db.saveRecipe(
+      recipeId: recipe.id,
+      name: 'Porridge',
+      portions: 1,
+      totalWeight: 100,
+      ingredients: [Ingredient(oatsFood, 100)],
+    );
+    expect(edited.id, recipe.id);
+    expect(edited.kcal, 372);
+    expect((await db.recipeIngredientsOf(recipe.id)).map((i) => (i.food.name, i.amount)), [('Haferflocken', 100.0)]);
+    expect(await db.watchRecipes().first, hasLength(1));
+  });
+
+  test('Migration von Version 1: Rezept-Spalte und -Tabelle werden angelegt', () async {
+    final v1 = NativeDatabase.memory(
+      setup: (raw) {
+        raw.execute(
+          'CREATE TABLE foods (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, barcode TEXT NULL UNIQUE, '
+          'name TEXT NOT NULL, brand TEXT NULL, is_liquid INTEGER NOT NULL DEFAULT 0, serving_size REAL NULL, '
+          'source INTEGER NOT NULL, kcal REAL NULL, protein REAL NULL, carbs REAL NULL, sugar REAL NULL, '
+          'fiber REAL NULL, fat REAL NULL, saturated_fat REAL NULL, mono_unsaturated_fat REAL NULL, '
+          'poly_unsaturated_fat REAL NULL, salt REAL NULL, updated_at INTEGER NOT NULL DEFAULT 0)',
+        );
+        raw.execute("INSERT INTO foods (name, source, kcal) VALUES ('Alt', 1, 100)");
+        raw.execute('PRAGMA user_version = 1');
+      },
+    );
+    final migrated = AppDatabase(v1);
+    addTearDown(migrated.close);
+    final old = (await migrated.select(migrated.foods).get()).single;
+    expect(old.name, 'Alt');
+    final recipe = await migrated.saveRecipe(
+      name: 'Neu',
+      portions: 1,
+      totalWeight: 100,
+      ingredients: [Ingredient(old, 100)],
+    );
+    expect(recipe.kcal, 100);
+  });
 }

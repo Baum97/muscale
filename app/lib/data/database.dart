@@ -18,7 +18,7 @@ enum Meal {
   final String label;
 }
 
-enum FoodSource { openFoodFacts, custom }
+enum FoodSource { openFoodFacts, custom, recipe }
 
 /// Profil – genau eine Zeile (id = 1).
 class Profiles extends Table {
@@ -49,6 +49,9 @@ class Foods extends Table {
   BoolColumn get isLiquid => boolean().withDefault(const Constant(false))();
   RealColumn get servingSize => real().nullable()();
   IntColumn get source => intEnum<FoodSource>()();
+
+  /// Nur Rezepte: Gewicht des fertigen Gerichts in g.
+  RealColumn get recipeTotalWeight => real().nullable()();
   RealColumn get kcal => real().nullable()();
   RealColumn get protein => real().nullable()();
   RealColumn get carbs => real().nullable()();
@@ -60,6 +63,16 @@ class Foods extends Table {
   RealColumn get polyUnsaturatedFat => real().nullable()();
   RealColumn get salt => real().nullable()();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Zutaten eines Rezepts. Das Rezept selbst ist ein Lebensmittel (Quelle „recipe“) mit Nährwerten pro 100 g.
+class RecipeIngredients extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get recipeId => integer().references(Foods, #id)();
+  IntColumn get foodId => integer().references(Foods, #id)();
+
+  /// Gramm bzw. Milliliter.
+  RealColumn get amount => real()();
 }
 
 class DiaryEntries extends Table {
@@ -107,6 +120,12 @@ extension FoodNutrients on Food {
   );
 }
 
+class Ingredient {
+  const Ingredient(this.food, this.amount);
+  final Food food;
+  final double amount;
+}
+
 class EntryWithFood {
   const EntryWithFood(this.entry, this.food);
   final DiaryEntry entry;
@@ -115,12 +134,22 @@ class EntryWithFood {
   Nutrients get nutrients => food.nutrients.forAmount(entry.amount);
 }
 
-@DriftDatabase(tables: [Profiles, Foods, DiaryEntries, CompletedDays, WeightEntries])
+@DriftDatabase(tables: [Profiles, Foods, DiaryEntries, CompletedDays, WeightEntries, RecipeIngredients])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'muscale'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(foods, foods.recipeTotalWeight);
+        await m.createTable(recipeIngredients);
+      }
+    },
+  );
 
   // Profil
 
@@ -169,6 +198,66 @@ class AppDatabase extends _$AppDatabase {
       ..orderBy([OrderingTerm.desc(lastUse)])
       ..limit(limit);
     return query.watch().map((rows) => [for (final r in rows) r.readTable(foods)]);
+  }
+
+  // Rezepte
+
+  Stream<List<Food>> watchRecipes() =>
+      (select(foods)
+            ..where((f) => f.source.equalsValue(FoodSource.recipe))
+            ..orderBy([(f) => OrderingTerm.asc(f.name)]))
+          .watch();
+
+  Future<List<Ingredient>> recipeIngredientsOf(int recipeId) async {
+    final query = select(recipeIngredients).join([innerJoin(foods, foods.id.equalsExp(recipeIngredients.foodId))])
+      ..where(recipeIngredients.recipeId.equals(recipeId))
+      ..orderBy([OrderingTerm.asc(recipeIngredients.id)]);
+    final rows = await query.get();
+    return [for (final r in rows) Ingredient(r.readTable(foods), r.readTable(recipeIngredients).amount)];
+  }
+
+  /// Legt ein Rezept an oder überschreibt es. [totalWeight] = Gewicht des fertigen Gerichts (nach dem Kochen).
+  Future<Food> saveRecipe({
+    int? recipeId,
+    required String name,
+    required int portions,
+    required double totalWeight,
+    required List<Ingredient> ingredients,
+  }) {
+    final n = recipeNutrientsPer100([for (final i in ingredients) (i.food.nutrients, i.amount)], totalWeight);
+    final row = FoodsCompanion(
+      name: Value(name),
+      source: const Value(FoodSource.recipe),
+      isLiquid: const Value(false),
+      servingSize: Value(totalWeight / portions),
+      recipeTotalWeight: Value(totalWeight),
+      kcal: Value(n.kcal),
+      protein: Value(n.protein),
+      carbs: Value(n.carbs),
+      sugar: Value(n.sugar),
+      fiber: Value(n.fiber),
+      fat: Value(n.fat),
+      saturatedFat: Value(n.saturatedFat),
+      monoUnsaturatedFat: Value(n.monoUnsaturatedFat),
+      polyUnsaturatedFat: Value(n.polyUnsaturatedFat),
+      salt: Value(n.salt),
+      updatedAt: Value(DateTime.now()),
+    );
+    return transaction(() async {
+      final int id;
+      if (recipeId == null) {
+        id = await into(foods).insert(row);
+      } else {
+        id = recipeId;
+        await (update(foods)..where((f) => f.id.equals(id))).write(row);
+        await (delete(recipeIngredients)..where((r) => r.recipeId.equals(id))).go();
+      }
+      for (final i in ingredients) {
+        await into(recipeIngredients)
+            .insert(RecipeIngredientsCompanion.insert(recipeId: id, foodId: i.food.id, amount: i.amount));
+      }
+      return (select(foods)..where((f) => f.id.equals(id))).getSingle();
+    });
   }
 
   // Tagebuch

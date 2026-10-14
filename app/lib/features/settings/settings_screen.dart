@@ -10,6 +10,7 @@ import '../../data/backup.dart';
 import '../../domain/days.dart';
 import '../../providers.dart';
 import '../../widgets/format.dart';
+import '../food/recipe_screen.dart';
 import '../onboarding/profile_form_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -41,6 +42,12 @@ class SettingsScreen extends ConsumerWidget {
               subtitle: const Text('Verwirft das Tagesziel aus dem Check-in.'),
               onTap: () => ref.read(databaseProvider).setCalorieTargetOverride(null),
             ),
+          ListTile(
+            leading: const Icon(Icons.menu_book_outlined),
+            title: const Text('Meine Rezepte'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RecipesScreen())),
+          ),
           const Divider(),
           const ListTile(title: Text('Darstellung')),
           Padding(

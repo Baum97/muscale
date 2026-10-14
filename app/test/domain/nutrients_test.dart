@@ -54,4 +54,27 @@ void main() {
       expect(portionOptions(isLiquid: true, servingSize: 250).map((p) => p.amount), [200, 250, 330, 500]);
     });
   });
+
+  group('Rezept', () {
+    test('Nährwerte pro 100 g des fertigen Gerichts', () {
+      // 100 g Haferflocken + 300 ml Milch, eingekocht auf 350 g
+      final n = recipeNutrientsPer100([
+        (const Nutrients(kcal: 372, protein: 13.5, carbs: 58.7, sugar: 0.7, fat: 7, saturatedFat: 1.3), 100),
+        (const Nutrients(kcal: 64, protein: 3.4, carbs: 4.8, sugar: 4.8, fat: 3.5, saturatedFat: 2.3), 300),
+      ], 350);
+      expect(n.kcal, closeTo((372 + 192) / 3.5, 1e-9));
+      expect(n.protein, closeTo((13.5 + 10.2) / 3.5, 1e-9));
+      expect(n.saturatedFat, closeTo((1.3 + 6.9) / 3.5, 1e-9));
+      expect(n.fiber, isNull);
+    });
+
+    test('Einfach/mehrfach ungesättigt nur, wenn alle Zutaten sie angeben', () {
+      final n = recipeNutrientsPer100([
+        (const Nutrients(fat: 10, saturatedFat: 2, monoUnsaturatedFat: 5, polyUnsaturatedFat: 3), 100),
+        (const Nutrients(fat: 10, saturatedFat: 4), 100),
+      ], 200);
+      expect(n.monoUnsaturatedFat, isNull);
+      expect(n.unsaturatedFat, 7); // (20 − 6) / 2
+    });
+  });
 }

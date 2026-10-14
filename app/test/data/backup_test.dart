@@ -44,6 +44,7 @@ void main() {
     await db.addEntry(day: '2026-10-14', meal: Meal.snacks, foodId: food.id, amount: 150);
     await db.setDayComplete('2026-10-14', true);
     await db.saveWeight('2026-10-14', 65.4);
+    await db.saveRecipe(name: 'Skyr-Bowl', portions: 1, totalWeight: 200, ingredients: [Ingredient(food, 200)]);
   }
 
   test('Export und Import ergeben dieselben Daten', () async {
@@ -62,6 +63,8 @@ void main() {
     expect(entries.single.nutrients.protein, closeTo(16.5, 1e-9));
     expect(await target.watchDayComplete('2026-10-14').first, isTrue);
     expect((await target.watchWeights().first).map((w) => (w.day, w.kg)), [('2026-10-14', 65.4)]);
+    final recipe = (await target.watchRecipes().first).single;
+    expect((await target.recipeIngredientsOf(recipe.id)).single.food.name, 'Skyr');
   });
 
   test('Fremde Datei wird abgelehnt, Daten bleiben unverändert', () async {

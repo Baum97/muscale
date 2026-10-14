@@ -66,6 +66,8 @@ final dayCompleteProvider = StreamProvider.family<bool, String>(
 
 final recentFoodsProvider = StreamProvider<List<Food>>((ref) => ref.watch(databaseProvider).watchRecentFoods());
 
+final recipesProvider = StreamProvider<List<Food>>((ref) => ref.watch(databaseProvider).watchRecipes());
+
 final completedDaysProvider = StreamProvider<List<CompletedDay>>(
   (ref) => ref.watch(databaseProvider).watchCompletedDays(),
 );

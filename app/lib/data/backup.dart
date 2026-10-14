@@ -15,7 +15,7 @@ class BackupException implements Exception {
   String toString() => message;
 }
 
-/// Alle Daten als JSON – Profil, Lebensmittel, Tagebuch, abgehakte Tage, Gewicht.
+/// Alle Daten als JSON – Profil, Lebensmittel und Rezepte, Tagebuch, abgehakte Tage, Gewicht.
 Future<String> exportBackup(AppDatabase db, {DateTime? now}) async {
   final data = {
     'format': backupFormat,
@@ -27,6 +27,7 @@ Future<String> exportBackup(AppDatabase db, {DateTime? now}) async {
     'diaryEntries': [for (final r in await db.select(db.diaryEntries).get()) r.toJson()],
     'completedDays': [for (final r in await db.select(db.completedDays).get()) r.toJson()],
     'weightEntries': [for (final r in await db.select(db.weightEntries).get()) r.toJson()],
+    'recipeIngredients': [for (final r in await db.select(db.recipeIngredients).get()) r.toJson()],
   };
   return const JsonEncoder.withIndent(' ').convert(data);
 }
@@ -55,18 +56,27 @@ Future<void> importBackup(AppDatabase db, String text) async {
   final List<DiaryEntry> entries;
   final List<CompletedDay> completed;
   final List<WeightEntry> weights;
+  final List<RecipeIngredient> ingredients;
   try {
     profiles = rows('profiles').map(Profile.fromJson).toList();
     foods = rows('foods').map(Food.fromJson).toList();
     entries = rows('diaryEntries').map(DiaryEntry.fromJson).toList();
     completed = rows('completedDays').map(CompletedDay.fromJson).toList();
     weights = rows('weightEntries').map(WeightEntry.fromJson).toList();
+    ingredients = rows('recipeIngredients').map(RecipeIngredient.fromJson).toList();
   } catch (_) {
     throw BackupException('Die Sicherung ist beschädigt.');
   }
 
   await db.transaction(() async {
-    for (final TableInfo table in [db.diaryEntries, db.completedDays, db.weightEntries, db.foods, db.profiles]) {
+    for (final TableInfo table in [
+      db.recipeIngredients,
+      db.diaryEntries,
+      db.completedDays,
+      db.weightEntries,
+      db.foods,
+      db.profiles,
+    ]) {
       await db.delete(table).go();
     }
     await db.batch((b) {
@@ -75,6 +85,7 @@ Future<void> importBackup(AppDatabase db, String text) async {
       b.insertAll(db.diaryEntries, entries);
       b.insertAll(db.completedDays, completed);
       b.insertAll(db.weightEntries, weights);
+      b.insertAll(db.recipeIngredients, ingredients);
     });
   });
 }
