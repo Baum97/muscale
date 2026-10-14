@@ -4,6 +4,8 @@
     <!-- Barcode scannen -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <!-- Erinnerungen nach Neustart wieder einplanen -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- Gewicht von Waagen über Health Connect lesen (nur lesen) -->
     <uses-permission android:name="android.permission.health.READ_WEIGHT"/>
 
@@ -37,6 +39,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Erinnerungen (flutter_local_notifications) -->
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"/>
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
         <!-- Health Connect ab Android 14: Link zur Datenschutzerklärung -->
         <activity-alias
             android:name="ViewPermissionUsageActivity"

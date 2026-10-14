@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'data/database.dart';
 import 'data/open_food_facts.dart';
 import 'data/scale_sync.dart';
+import 'services/reminders.dart';
 import 'domain/days.dart';
 import 'domain/targets.dart';
 import 'domain/trend.dart';
@@ -176,5 +177,70 @@ class ScaleEnabledSetting extends Notifier<bool> {
     state = enabled;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_key, enabled);
+  }
+}
+
+// Erinnerungen
+
+final reminderSchedulerProvider = Provider<ReminderScheduler>((ref) => LocalReminderScheduler());
+
+class ReminderSetting {
+  const ReminderSetting({required this.enabled, required this.time});
+  final bool enabled;
+  final TimeOfDay time;
+}
+
+/// Tägliche Erinnerungen; gespeichert in den Einstellungen und beim Start neu eingeplant.
+final remindersProvider = NotifierProvider<RemindersSetting, Map<ReminderKind, ReminderSetting>>(RemindersSetting.new);
+
+class RemindersSetting extends Notifier<Map<ReminderKind, ReminderSetting>> {
+  @override
+  Map<ReminderKind, ReminderSetting> build() {
+    _load();
+    return {for (final k in ReminderKind.values) k: ReminderSetting(enabled: false, time: k.defaultTime)};
+  }
+
+  static String _enabledKey(ReminderKind k) => 'reminder_${k.name}_enabled';
+  static String _minutesKey(ReminderKind k) => 'reminder_${k.name}_minutes';
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final loaded = {
+        for (final k in ReminderKind.values)
+          k: ReminderSetting(
+            enabled: prefs.getBool(_enabledKey(k)) ?? false,
+            time: _fromMinutes(prefs.getInt(_minutesKey(k))) ?? k.defaultTime,
+          ),
+      };
+      state = loaded;
+      // Neu einplanen, falls das System die Erinnerungen verworfen hat (z. B. nach einem Update).
+      for (final e in loaded.entries) {
+        if (e.value.enabled) await ref.read(reminderSchedulerProvider).scheduleDaily(e.key, e.value.time);
+      }
+    } catch (_) {
+      // Ohne gespeicherte Einstellungen bleiben die Erinnerungen aus.
+    }
+  }
+
+  static TimeOfDay? _fromMinutes(int? m) => m == null ? null : TimeOfDay(hour: m ~/ 60, minute: m % 60);
+
+  /// Schaltet eine Erinnerung ein/aus oder ändert die Uhrzeit. False, wenn die Berechtigung fehlt.
+  Future<bool> set(ReminderKind kind, {bool? enabled, TimeOfDay? time}) async {
+    final scheduler = ref.read(reminderSchedulerProvider);
+    final current = state[kind]!;
+    final next = ReminderSetting(enabled: enabled ?? current.enabled, time: time ?? current.time);
+    if (next.enabled && !current.enabled && !await scheduler.requestPermission()) return false;
+
+    state = {...state, kind: next};
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_enabledKey(kind), next.enabled);
+    await prefs.setInt(_minutesKey(kind), next.time.hour * 60 + next.time.minute);
+    if (next.enabled) {
+      await scheduler.scheduleDaily(kind, next.time);
+    } else {
+      await scheduler.cancel(kind);
+    }
+    return true;
   }
 }

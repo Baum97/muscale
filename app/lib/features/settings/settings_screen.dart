@@ -11,6 +11,7 @@ import '../../data/csv_export.dart';
 import '../../data/database.dart';
 import '../../domain/days.dart';
 import '../../providers.dart';
+import '../../services/reminders.dart';
 import '../../widgets/format.dart';
 import '../food/recipe_screen.dart';
 import '../info/info_screen.dart';
@@ -59,6 +60,9 @@ class SettingsScreen extends ConsumerWidget {
             value: ref.watch(scaleEnabledProvider),
             onChanged: (on) => on ? connectScale(context, ref) : ref.read(scaleEnabledProvider.notifier).set(false),
           ),
+          const Divider(),
+          const ListTile(title: Text('Erinnerungen')),
+          for (final kind in ReminderKind.values) _ReminderTile(kind),
           const Divider(),
           const ListTile(title: Text('Darstellung')),
           Padding(
@@ -224,5 +228,38 @@ class _DonationTile extends StatelessWidget {
           subtitle: Text('Trinkgeld über Google Play folgt.'),
         );
     }
+  }
+}
+
+class _ReminderTile extends ConsumerWidget {
+  const _ReminderTile(this.kind);
+  final ReminderKind kind;
+
+  Future<void> _set(BuildContext context, WidgetRef ref, {bool? enabled, TimeOfDay? time}) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await ref.read(remindersProvider.notifier).set(kind, enabled: enabled, time: time);
+    if (!ok) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Bitte erlaube Benachrichtigungen in den Android-Einstellungen.')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final setting = ref.watch(remindersProvider)[kind]!;
+    return SwitchListTile(
+      secondary: Icon(kind == ReminderKind.weighIn ? Icons.alarm : Icons.task_alt),
+      title: Text(kind.title),
+      subtitle: InkWell(
+        onTap: () async {
+          final time = await showTimePicker(context: context, initialTime: setting.time);
+          if (time != null && context.mounted) await _set(context, ref, time: time);
+        },
+        child: Text('täglich um ${setting.time.format(context)} Uhr · ändern'),
+      ),
+      value: setting.enabled,
+      onChanged: (on) => _set(context, ref, enabled: on),
+    );
   }
 }

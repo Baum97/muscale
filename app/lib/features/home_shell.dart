@@ -26,6 +26,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       if (enabled && was == false) syncScale(context, ref, quiet: true);
     });
     _lifecycle = AppLifecycleListener(onResume: () => syncScale(context, ref, quiet: true));
+    // Erinnerungen laden und neu einplanen.
+    ref.read(remindersProvider);
   }
 
   @override
