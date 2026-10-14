@@ -1,18 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers.dart';
 import 'settings/settings_screen.dart';
 import 'today/today_screen.dart';
+import 'weight/scale_actions.dart';
 import 'weight/weight_screen.dart';
 
-class HomeShell extends StatefulWidget {
+class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
 
   @override
-  State<HomeShell> createState() => _HomeShellState();
+  ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends State<HomeShell> {
+class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    // Waage: neue Messungen beim Start (sobald die Einstellung geladen ist) und beim Zurückkehren in die App.
+    ref.listenManual(scaleEnabledProvider, (was, enabled) {
+      if (enabled && was == false) syncScale(context, ref, quiet: true);
+    });
+    _lifecycle = AppLifecycleListener(onResume: () => syncScale(context, ref, quiet: true));
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

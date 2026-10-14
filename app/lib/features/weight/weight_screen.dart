@@ -5,6 +5,7 @@ import '../../domain/days.dart';
 import '../../domain/trend.dart';
 import '../../providers.dart';
 import '../../widgets/format.dart';
+import 'scale_actions.dart';
 import 'weight_chart.dart';
 
 class WeightScreen extends ConsumerWidget {
@@ -15,7 +16,17 @@ class WeightScreen extends ConsumerWidget {
     final trend = ref.watch(weightTrendProvider);
     final checkIn = ref.watch(checkInProvider).value;
     return Scaffold(
-      appBar: AppBar(title: const Text('Gewicht')),
+      appBar: AppBar(
+        title: const Text('Gewicht'),
+        actions: [
+          if (ref.watch(scaleEnabledProvider))
+            IconButton(
+              tooltip: 'Von der Waage übernehmen',
+              icon: const Icon(Icons.sync),
+              onPressed: () => syncScale(context, ref),
+            ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

@@ -118,4 +118,19 @@ void main() {
       expect(r.kind, RecommendationKind.insufficientData);
     });
   });
+
+  group('Waagen-Import', () {
+    test('Erste Messung des Tages zählt, vorhandene Tage bleiben unberührt', () {
+      final result = weightsToImport(
+        [
+          (DateTime(2026, 10, 1, 19, 30), 85.9),
+          (DateTime(2026, 10, 1, 7, 5), 85.1),
+          (DateTime(2026, 10, 2, 7, 0), 84.8),
+          (DateTime(2026, 10, 3, 6, 50), 84.6),
+        ],
+        {DateTime.utc(2026, 10, 2)},
+      );
+      expect(result.map((w) => (w.day, w.kg)), [(DateTime.utc(2026, 10, 1), 85.1), (DateTime.utc(2026, 10, 3), 84.6)]);
+    });
+  });
 }

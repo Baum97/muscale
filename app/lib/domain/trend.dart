@@ -165,3 +165,17 @@ Recommendation recommend({
     belowBmr: newTarget < bmr,
   );
 }
+
+/// Messungen einer Waage (Zeitpunkt in Ortszeit, kg) → höchstens eine Wiegung pro Tag: die erste des Tages
+/// (morgens, nüchtern). Tage, an denen schon eine Wiegung gespeichert ist, bleiben unberührt.
+List<WeightPoint> weightsToImport(Iterable<(DateTime, double)> readings, Set<DateTime> existingDays) {
+  final firstOfDay = <DateTime, (DateTime, double)>{};
+  for (final r in readings) {
+    final day = dayOf(r.$1);
+    if (existingDays.contains(day)) continue;
+    final current = firstOfDay[day];
+    if (current == null || r.$1.isBefore(current.$1)) firstOfDay[day] = r;
+  }
+  final result = [for (final e in firstOfDay.entries) WeightPoint(e.key, e.value.$2)];
+  return result..sort((a, b) => a.day.compareTo(b.day));
+}

@@ -12,6 +12,7 @@ import '../../providers.dart';
 import '../../widgets/format.dart';
 import '../food/recipe_screen.dart';
 import '../onboarding/profile_form_screen.dart';
+import '../weight/scale_actions.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -47,6 +48,13 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('Meine Rezepte'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RecipesScreen())),
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.monitor_weight_outlined),
+            title: const Text('Waage (Health Connect)'),
+            subtitle: const Text('Gewicht automatisch von deiner Waagen-App übernehmen'),
+            value: ref.watch(scaleEnabledProvider),
+            onChanged: (on) => on ? connectScale(context, ref) : ref.read(scaleEnabledProvider.notifier).set(false),
           ),
           const Divider(),
           const ListTile(title: Text('Darstellung')),

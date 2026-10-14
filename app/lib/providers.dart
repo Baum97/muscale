@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/database.dart';
 import 'data/open_food_facts.dart';
+import 'data/scale_sync.dart';
 import 'domain/days.dart';
 import 'domain/targets.dart';
 import 'domain/trend.dart';
@@ -137,5 +138,37 @@ class ThemeModeSetting extends Notifier<ThemeMode> {
     state = mode;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key, mode.name);
+  }
+}
+
+// Waage
+
+final scaleProvider = Provider<HealthConnectScale>((ref) => HealthConnectScale());
+
+/// Gewicht automatisch aus Health Connect übernehmen.
+final scaleEnabledProvider = NotifierProvider<ScaleEnabledSetting, bool>(ScaleEnabledSetting.new);
+
+class ScaleEnabledSetting extends Notifier<bool> {
+  static const _key = 'scale_health_connect';
+
+  @override
+  bool build() {
+    _load();
+    return false;
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      state = prefs.getBool(_key) ?? false;
+    } catch (_) {
+      // Ohne gespeicherte Einstellung bleibt die Waage aus.
+    }
+  }
+
+  Future<void> set(bool enabled) async {
+    state = enabled;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key, enabled);
   }
 }

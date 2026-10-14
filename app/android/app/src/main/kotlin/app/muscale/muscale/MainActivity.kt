@@ -1,5 +1,6 @@
 package app.muscale.muscale
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity()
+// FlutterFragmentActivity: Health Connect fragt Berechtigungen über registerForActivityResult an.
+class MainActivity : FlutterFragmentActivity()
