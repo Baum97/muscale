@@ -215,11 +215,11 @@ Stand: ✅ umgesetzt · ⬜ offen
 - ✅ Export/Import (JSON) als Datensicherung
 - ✅ Waage über Health Connect (Kapitel 8)
 - ⬜ Grundnahrungsmittel aus dem BLS 4.0 (Datei muss noch ins Repo, siehe Kapitel 13)
-- ⬜ Favoriten
-- ⬜ CSV-Export
-- ⬜ Lokale Erinnerungen (Wiegen, Tag abschließen) – ohne Firebase
+- ✅ Favoriten
+- ✅ CSV-Export (Tagebuch, Gewicht; Excel-tauglich)
+- ✅ Lokale Erinnerungen (Wiegen, Tag abschließen) – ohne Firebase
 - ⬜ Spenden: Link (F-Droid) steht vorbereitet, Trinkgeld über Play Billing fehlt
-- ⬜ Info-Seiten: Makros, Zucker vs. Stärke, Fettqualität, Eiweiß im Kraftsport
+- ✅ Info-Seiten („Wissen“): Eiweiß im Kraftsport, Zucker vs. Stärke, Fettqualität, Bedarfsmessung, Wiegen
 
 ### Später
 
@@ -264,7 +264,10 @@ und Meldepflichten. Deshalb zwei Build-Varianten aus demselben Code:
 | F-Droid / GitHub | Link zu GitHub Sponsors / Ko-fi in den Einstellungen | keiner |
 | Google Play | Trinkgeld über Google Play Billing (feste Beträge, z. B. 2 € / 5 € / 10 €) | ca. 10–15 % |
 
-Die F-Droid-Variante enthält keinen Play-Billing-Code (eigener Gradle-Flavor).
+Die F-Droid-Variante darf keinen Play-Billing-Code enthalten. Flutter-Pakete lassen sich aber nicht je
+Gradle-Flavor ein- und ausschalten – das Paket `in_app_purchase` landet sonst in beiden Varianten.
+Geplante Umsetzung: Trinkgeld als eigenes Dart-Paket (`packages/tip_jar_play`), das nur die Play-Variante
+einbindet (eigene `pubspec`-Überschreibung im Play-Build). F-Droid baut ohne dieses Paket.
 Aktuelle Gebühren vor dem Release in der Play Console prüfen.
 
 **Später:** Wird MuScale groß, kann ein gemeinnütziger Verein Empfänger der Spenden werden.
