@@ -55,7 +55,7 @@ Pflicht: Energie, Fett, davon gesättigte Fettsäuren, Kohlenhydrate, davon Zuck
 |---|---|---|
 | Open Food Facts | Barcode-Produkte | ODbL; App fragt die API direkt ab (eigener User-Agent) |
 | USDA FoodData Central | Grundnahrungsmittel mit Stärke & Fettsäuren | gemeinfrei |
-| BLS 4.0 (Bundeslebensmittelschlüssel, Max Rubner-Institut) | deutsche Grundnahrungsmittel: ~7.100 Lebensmittel, 138 Nährstoffe inkl. Stärke und Fettsäuren | seit 16.12.2025 kostenfrei; genaue Nutzungsbedingungen (Quellenangabe, Weitergabe in der App) vor Einbau prüfen |
+| BLS 4.0 (Bundeslebensmittelschlüssel, Max Rubner-Institut) | deutsche Grundnahrungsmittel: ~7.100 Lebensmittel, 138 Nährstoffe inkl. Stärke und Fettsäuren | seit 16.12.2025 kostenfrei, CC BY 4.0 (Quellenangabe in der App) |
 | Eigene Einträge | unbekannte Produkte, Rezepte | lokal; optional an Open Food Facts melden |
 
 Gescannte und gesuchte Produkte werden lokal zwischengespeichert → zweiter Zugriff offline.
@@ -192,30 +192,38 @@ Ziel: Gewicht automatisch übernehmen, ohne eigenen Server und ohne Google-Pflic
 | Herstellerkonten (Withings-API etc.) | OAuth über Cloud | – | braucht Server/Geheimschlüssel → **nicht geplant** |
 | Bluetooth direkt | eigene Waagen-Protokolle | keine Zusatz-App | hoher Aufwand pro Waagenmodell → **nicht geplant** |
 
-Plan: Health Connect in Version 1.x, openScale danach. Import nur lesend (Gewicht, optional Körperfett).
+Umgesetzt: Health Connect (nur `READ_WEIGHT`). Pro Tag zählt die erste Messung; Tage mit vorhandener Wiegung
+bleiben unberührt. Abgleich beim Start, beim Zurückkehren in die App und per Knopf. openScale folgt.
+Import nur lesend (Gewicht, optional später Körperfett).
 Manuelle Eingabe und CSV-Import bleiben immer möglich.
 
 ## 9. Funktionen
 
 ### Version 1.0
 
-- Onboarding mit Profil, Ziel, Startschätzung
-- Tagebuch nach Mahlzeiten: Frühstück, Mittag, Abend, Snacks
-- Scanner, Suche, Zuletzt gegessen, Favoriten
-- Eigene Lebensmittel und Rezepte (mehrere Zutaten, Portionen)
-- Tagesansicht: Kalorien-Ring, Balken für Eiweiß / Kohlenhydrate / Fett, aufklappbar
+Stand: ✅ umgesetzt · ⬜ offen
+
+- ✅ Onboarding mit Profil, Ziel, Startschätzung
+- ✅ Tagebuch nach Mahlzeiten: Frühstück, Mittag, Abend, Snacks
+- ✅ Scanner, Suche nach Namen (gespeichert + Open Food Facts), Zuletzt gegessen
+- ✅ Eigene Lebensmittel und Rezepte (mehrere Zutaten, Portionen, Gewicht nach dem Kochen)
+- ✅ Tagesansicht: Kalorien-Ring, Balken für Eiweiß / Kohlenhydrate / Fett, aufklappbar
   (Zucker/Stärke/Ballaststoffe, gesättigt/ungesättigt)
-- „Tag vollständig“ abhaken
-- Gewicht eintragen, Trend-Grafik
-- Wöchentlicher Check-in mit gemessenem Bedarf (Kapitel 7)
-- Export/Import (JSON + CSV) als Datensicherung
-- Lokale Erinnerungen (Wiegen, Tag abschließen) – ohne Firebase
-- Spenden in den Einstellungen (F-Droid: Link · Play: Trinkgeld über Play Billing)
-- Info-Seiten: Makros, Zucker vs. Stärke, Fettqualität, Eiweiß im Kraftsport
+- ✅ „Tag vollständig“ abhaken
+- ✅ Gewicht eintragen, Trend-Grafik (30 / 90 Tage / alles)
+- ✅ Check-in mit gemessenem Bedarf (Kapitel 7)
+- ✅ Export/Import (JSON) als Datensicherung
+- ✅ Waage über Health Connect (Kapitel 8)
+- ⬜ Grundnahrungsmittel aus dem BLS 4.0 (Datei muss noch ins Repo, siehe Kapitel 13)
+- ⬜ Favoriten
+- ⬜ CSV-Export
+- ⬜ Lokale Erinnerungen (Wiegen, Tag abschließen) – ohne Firebase
+- ⬜ Spenden: Link (F-Droid) steht vorbereitet, Trinkgeld über Play Billing fehlt
+- ⬜ Info-Seiten: Makros, Zucker vs. Stärke, Fettqualität, Eiweiß im Kraftsport
 
 ### Später
 
-- Health Connect / openScale (Kapitel 8)
+- openScale (Kapitel 8)
 - Trainingstage vs. Ruhetage mit unterschiedlichen Zielen
 - Wasser
 - Mikronährstoffe, sofern Daten vorhanden
@@ -229,7 +237,9 @@ Manuelle Eingabe und CSV-Import bleiben immer möglich.
 | App | Flutter (Dart), Android zuerst |
 | Lokale Datenbank | SQLite über `drift` |
 | Barcode | `flutter_zxing` |
-| Netzwerk | nur Open Food Facts API (und später USDA-Daten als Paket in der App) |
+| Netzwerk | nur Open Food Facts API; BLS-Daten als Paket in der App |
+| Waage | Health Connect über das Paket `health` (nur lesend) |
+| Dateien | `file_picker` (Speichern/Öffnen über den Android-Dateidialog) |
 | Zustand | Riverpod |
 | Benachrichtigungen | lokal (`flutter_local_notifications`), kein FCM |
 | Backend | keins |
@@ -303,7 +313,9 @@ Falls Werbung jemals kommt, gilt ohne Ausnahme:
 
 ## 13. Offene Punkte
 
-- [ ] BLS-4.0-Nutzungsbedingungen prüfen (Quellenangabe, Weitergabe in der App)
+- [x] BLS 4.0: CC BY 4.0 – Nutzung in der App erlaubt, Quellenangabe „Max Rubner-Institut (2025): Bundeslebensmittelschlüssel (BLS), Version 4.0“
+- [ ] BLS-Datei (`BLS_4_0_Daten_2025_DE.xlsx`) ins Repo unter `data/bls/` legen → Import in die App
+- [ ] Google Play: Health-Connect-Berechtigung in der Play Console deklarieren (Datenschutzerklärung nötig)
 - [ ] Health Connect: F-Droid-Tauglichkeit des Client-Pakets prüfen
 - [ ] openScale-Schnittstelle prüfen
 - [ ] Play-Variante: Trinkgeld-Produkte anlegen, aktuelle Gebühren prüfen

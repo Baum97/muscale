@@ -35,7 +35,9 @@ lib/domain/        Reine Rechenlogik, ohne Flutter – vollständig getestet
   targets.dart       Alle Tagesziele für Profil + Gewicht
 lib/data/
   database.dart      drift-Tabellen und Abfragen (database.g.dart wird generiert)
-  open_food_facts.dart  Produktsuche per Barcode
-lib/features/      Bildschirme: Onboarding/Profil, Tagebuch, Scanner, Lebensmittel, Gewicht, Einstellungen
+  open_food_facts.dart  Produktsuche per Barcode und Name
+  backup.dart        Datensicherung (JSON)
+  scale_sync.dart    Waage über Health Connect (nur lesend)
+lib/features/      Bildschirme: Onboarding/Profil, Tagebuch, Scanner, Suche, Rezepte, Gewicht (Diagramm, Check-in), Einstellungen
 lib/providers.dart Riverpod-Provider
 ```
