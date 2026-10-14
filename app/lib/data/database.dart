@@ -6,6 +6,8 @@ import '../domain/nutrients.dart';
 
 part 'database.g.dart';
 
+// Enums werden als Index gespeichert (auch in Sicherungen): neue Werte nur hinten anhängen, nie umsortieren.
+
 enum Meal {
   breakfast('Frühstück'),
   lunch('Mittagessen'),

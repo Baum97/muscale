@@ -1,8 +1,13 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../config.dart';
+import '../../data/backup.dart';
+import '../../domain/days.dart';
 import '../../providers.dart';
 import '../../widgets/format.dart';
 import '../onboarding/profile_form_screen.dart';
@@ -54,6 +59,20 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
           const _DonationTile(),
           const Divider(),
+          const ListTile(title: Text('Datensicherung')),
+          ListTile(
+            leading: const Icon(Icons.upload_file),
+            title: const Text('Daten exportieren'),
+            subtitle: const Text('Speichert alle Daten als Datei, z. B. für ein neues Handy.'),
+            onTap: () => _export(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.download),
+            title: const Text('Daten importieren'),
+            subtitle: const Text('Ersetzt alle Daten auf diesem Gerät durch eine Sicherung.'),
+            onTap: () => _import(context, ref),
+          ),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.code),
             title: const Text('Quellcode (GPL-3.0)'),
@@ -82,6 +101,47 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+Future<void> _export(BuildContext context, WidgetRef ref) async {
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    final json = await exportBackup(ref.read(databaseProvider));
+    final saved = await FilePicker.saveFile(
+      fileName: 'muscale-${dayKey(today())}.json',
+      bytes: utf8.encode(json),
+      mimeType: 'application/json',
+    );
+    if (saved != null) messenger.showSnackBar(const SnackBar(content: Text('Sicherung gespeichert.')));
+  } catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text('Export fehlgeschlagen: $e')));
+  }
+}
+
+Future<void> _import(BuildContext context, WidgetRef ref) async {
+  final messenger = ScaffoldMessenger.of(context);
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Daten importieren?'),
+      content: const Text('Alle Daten auf diesem Gerät werden durch die Sicherung ersetzt.'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Abbrechen')),
+        FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Auswählen')),
+      ],
+    ),
+  );
+  if (ok != true) return;
+  try {
+    final file = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: ['json']);
+    if (file == null) return;
+    await importBackup(ref.read(databaseProvider), utf8.decode(await file.readAsBytes()));
+    messenger.showSnackBar(const SnackBar(content: Text('Sicherung wiederhergestellt.')));
+  } on BackupException catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text(e.message)));
+  } catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text('Import fehlgeschlagen: $e')));
   }
 }
 
