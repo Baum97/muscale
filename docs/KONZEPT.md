@@ -152,11 +152,14 @@ Ist der Zeitraum ungültig, zeigt die App, was fehlt („noch 2 vollständige Ta
 
 ### Rechnung
 
-1. **Gewichtstrend** statt Rohwerte: exponentiell geglätteter Durchschnitt (Glättung ~10 %/Tag).
-   Wasser, Salz, Kohlenhydrate und Zyklus lassen die Waage täglich um 1–2 kg schwanken.
-2. **Bedarf = Ø kcal − (Trendänderung in kg × 7700) / Tage**
+1. **Anzeige – Gewichtstrend** statt Rohwerte: exponentiell geglätteter Durchschnitt (Glättung 10 %/Tag;
+   Lücken zählen wie Tage mit gleichem Gewicht). Wasser, Salz, Kohlenhydrate und Zyklus lassen die Waage
+   täglich um 1–2 kg schwanken.
+2. **Auswertung – Ausgleichsgerade** durch alle Wiegungen der 14 Tage. Anders als der geglättete Trend hinkt
+   sie nicht hinterher (wichtig in den ersten 14 Tagen), einzelne Ausreißer wiegen trotzdem wenig.
+3. **Bedarf = Ø kcal − tägliche Gewichtsänderung (Steigung) × 7700**
 
-Beispiel: Ø 2600 kcal, Trend 85,0 → 84,4 kg in 14 Tagen
+Beispiel: Ø 2600 kcal, Gewicht sinkt gleichmäßig um 0,6 kg in 14 Tagen
 → 0,6 × 7700 / 14 = 330 kcal Defizit/Tag → gemessener Bedarf ≈ **2930 kcal**.
 
 ### Reaktion der App
@@ -164,7 +167,7 @@ Beispiel: Ø 2600 kcal, Trend 85,0 → 84,4 kg in 14 Tagen
 | Ergebnis | Reaktion |
 |---|---|
 | Ist-Tempo ≈ Ziel (± Toleranz) | Bestärken: „Läuft – du nimmst 0,3 kg/Woche ab. Weiter so.“ Ziel bleibt. |
-| Langsamer als gewünscht | Vorschlag: „Für 0,5 kg/Woche: 2380 statt 2600 kcal?“ |
+| Langsamer als gewünscht | Vorschlag: „Für 0,5 kg/Woche: 2400 statt 2600 kcal?“ (ideal wären 2380, max. −200 pro Schritt) |
 | Schneller als gewünscht / falsche Richtung | Vorschlag in die Gegenrichtung |
 | Zeitraum ungültig | Keine Anpassung, Hinweis was fehlt |
 
@@ -227,6 +230,7 @@ Manuelle Eingabe und CSV-Import bleiben immer möglich.
 | Lokale Datenbank | SQLite über `drift` |
 | Barcode | `flutter_zxing` |
 | Netzwerk | nur Open Food Facts API (und später USDA-Daten als Paket in der App) |
+| Zustand | Riverpod |
 | Benachrichtigungen | lokal (`flutter_local_notifications`), kein FCM |
 | Backend | keins |
 | Vertrieb | Google Play (Dev-Account vorhanden) + F-Droid, zwei Build-Varianten (Kapitel 11) |

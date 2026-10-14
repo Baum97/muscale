@@ -3,9 +3,12 @@
 Kostenloser Kalorien- und Makrozähler für Kraftsportler, der den **tatsächlichen** Kalorienbedarf
 aus Essen und Gewichtstrend misst. Ohne Konto, ohne Werbung, ohne Tracking, ohne Google.
 
-Stand: Konzeptphase · Android zuerst (Google Play + F-Droid)
+[![CI](https://github.com/Baum97/muscale/actions/workflows/ci.yml/badge.svg)](https://github.com/Baum97/muscale/actions/workflows/ci.yml)
+
+Stand: Grundgerüst · Android zuerst (Google Play + F-Droid)
 
 - **Konzept & Entscheidungen:** [`docs/KONZEPT.md`](docs/KONZEPT.md)
+- **App (Flutter):** [`app/`](app/README.md)
 
 ## Kurz
 
