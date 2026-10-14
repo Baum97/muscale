@@ -207,7 +207,7 @@ Manuelle Eingabe und CSV-Import bleiben immer möglich.
 - Wöchentlicher Check-in mit gemessenem Bedarf (Kapitel 7)
 - Export/Import (JSON + CSV) als Datensicherung
 - Lokale Erinnerungen (Wiegen, Tag abschließen) – ohne Firebase
-- Spenden-Link in den Einstellungen
+- Spenden in den Einstellungen (F-Droid: Link · Play: Trinkgeld über Play Billing)
 - Info-Seiten: Makros, Zucker vs. Stärke, Fettqualität, Eiweiß im Kraftsport
 
 ### Später
@@ -240,15 +240,21 @@ Manuelle Eingabe und CSV-Import bleiben immer möglich.
 
 ### Spenden je Vertriebsweg
 
-Google Play hat Apps wegen Spendenlinks schon gesperrt (WireGuard 2019, StreetComplete 2022,
-AnkiDroid 2026). Externe Spenden gelten dort offenbar nur für steuerbefreite Organisationen.
-Deshalb zwei Build-Varianten aus demselben Code:
+Spenden gibt es **nur in der App**. Google Play erlaubt externe Spendenlinks nur für steuerbefreite
+Organisationen (Sperren: WireGuard 2019, StreetComplete 2022, AnkiDroid 2026). Seit 30.06.2026 sind
+externe Links in EU/UK/USA zwar erlaubt, Google verlangt aber auch dafür Gebühren (laut Gebührentabelle ~20 %)
+und Meldepflichten. Deshalb zwei Build-Varianten aus demselben Code:
 
-| Variante | Spenden in der App |
-|---|---|
-| F-Droid / GitHub | Link zu GitHub Sponsors / Ko-fi in den Einstellungen |
-| Google Play | kein externer Link; optional „Trinkgeld“ über Google Play Billing (Google behält 15 %). Ob Play Billing in die Variante kommt, entscheiden wir vor dem Release. |
-| Überall | Spendenlink im README, auf der Website und in der Store-Beschreibung außerhalb der App (aktuelle Play-Richtlinie vor Release prüfen) |
+| Variante | Spenden in der App | Google-Anteil |
+|---|---|---|
+| F-Droid / GitHub | Link zu GitHub Sponsors / Ko-fi in den Einstellungen | keiner |
+| Google Play | Trinkgeld über Google Play Billing (feste Beträge, z. B. 2 € / 5 € / 10 €) | ca. 10–15 % |
+
+Die F-Droid-Variante enthält keinen Play-Billing-Code (eigener Gradle-Flavor).
+Aktuelle Gebühren vor dem Release in der Play Console prüfen.
+
+**Später:** Wird MuScale groß, kann ein gemeinnütziger Verein Empfänger der Spenden werden.
+Dann ist auch in der Play-Variante ein externer Spendenlink ohne Google-Anteil erlaubt.
 
 ### Lizenz: GPL-3.0 + kommerzielle Lizenz (Dual Licensing)
 
@@ -296,6 +302,6 @@ Falls Werbung jemals kommt, gilt ohne Ausnahme:
 - [ ] BLS-4.0-Nutzungsbedingungen prüfen (Quellenangabe, Weitergabe in der App)
 - [ ] Health Connect: F-Droid-Tauglichkeit des Client-Pakets prüfen
 - [ ] openScale-Schnittstelle prüfen
-- [ ] Google-Play-Variante: Trinkgeld über Play Billing ja/nein; aktuelle Payments-Richtlinie prüfen
+- [ ] Play-Variante: Trinkgeld-Produkte anlegen, aktuelle Gebühren prüfen
 - [ ] Text der kommerziellen Lizenz + CLA (anwaltlich prüfen lassen)
 - [ ] App-Icon, Farben (Light + Dark Mode)

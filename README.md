@@ -29,4 +29,4 @@ vorliegt (in Vorbereitung).
 
 ## Unterstützen
 
-MuScale ist kostenlos und finanziert sich nur über Spenden. Spendenlink folgt.
+MuScale ist kostenlos und finanziert sich nur über Spenden – direkt in der App.
