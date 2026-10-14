@@ -5,6 +5,7 @@ import '../../domain/days.dart';
 import '../../domain/trend.dart';
 import '../../providers.dart';
 import '../../widgets/format.dart';
+import 'weight_chart.dart';
 
 class WeightScreen extends ConsumerWidget {
   const WeightScreen({super.key});
@@ -20,9 +21,17 @@ class WeightScreen extends ConsumerWidget {
         children: [
           const _WeighInCard(),
           const SizedBox(height: 16),
+          if (trend.isNotEmpty)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: WeightChart(points: trend),
+              ),
+            ),
+          const SizedBox(height: 16),
           if (checkIn != null) _CheckInCard(checkIn),
           const SizedBox(height: 16),
-          if (trend.isNotEmpty) Text('Verlauf', style: Theme.of(context).textTheme.titleMedium),
+          if (trend.isNotEmpty) Text('Alle Wiegungen', style: Theme.of(context).textTheme.titleMedium),
           for (final p in trend.reversed)
             ListTile(
               contentPadding: EdgeInsets.zero,
