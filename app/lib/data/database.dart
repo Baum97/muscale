@@ -149,6 +149,16 @@ class AppDatabase extends _$AppDatabase {
     return into(foods).insertReturning(food);
   }
 
+  /// Gespeicherte Lebensmittel, deren Name oder Marke den Suchtext enthält.
+  Future<List<Food>> searchFoods(String query, {int limit = 30}) {
+    final pattern = '%${query.trim()}%';
+    return (select(foods)
+          ..where((f) => f.name.like(pattern) | f.brand.like(pattern))
+          ..orderBy([(f) => OrderingTerm.asc(f.name)])
+          ..limit(limit))
+        .get();
+  }
+
   /// Zuletzt gegessene Lebensmittel, neueste zuerst, ohne Duplikate.
   Stream<List<Food>> watchRecentFoods({int limit = 20}) {
     final lastUse = diaryEntries.createdAt.max();

@@ -7,6 +7,7 @@ import '../../providers.dart';
 import '../../widgets/format.dart';
 import '../scan/scan_screen.dart';
 import 'manual_food_screen.dart';
+import 'search_screen.dart';
 
 /// Einstieg „Essen hinzufügen“: Scannen, manuell eingeben oder aus „Zuletzt gegessen“.
 Future<void> showAddFoodSheet(BuildContext context, {required String day, required Meal meal}) {
@@ -46,6 +47,15 @@ class _AddFoodSheet extends ConsumerWidget {
             title: const Text('Barcode scannen'),
             onTap: () async {
               final food = await scanAndLookup(context, ref);
+              if (context.mounted) await _continueWith(context, food);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.search),
+            title: const Text('Suchen'),
+            onTap: () async {
+              final food = await Navigator.of(context)
+                  .push<Food>(MaterialPageRoute(builder: (_) => const SearchScreen()));
               if (context.mounted) await _continueWith(context, food);
             },
           ),

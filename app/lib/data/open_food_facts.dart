@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 import 'database.dart';
 
-/// Produktsuche per Barcode bei Open Food Facts (Daten unter ODbL).
+/// Produktsuche per Barcode und Name bei Open Food Facts (Daten unter ODbL).
 class OpenFoodFacts {
   OpenFoodFacts({http.Client? client}) : _client = client ?? http.Client();
 
@@ -24,6 +24,27 @@ class OpenFoodFacts {
     final json = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     if (json['status'] != 1 || json['product'] is! Map) return null;
     return parseProduct(barcode, json['product'] as Map<String, dynamic>);
+  }
+
+  /// Sucht Produkte nach Name. Liefert nur Produkte mit Barcode und Kalorienangabe.
+  Future<List<FoodsCompanion>> search(String query, {int pageSize = 25}) async {
+    final uri = Uri.https('world.openfoodfacts.org', '/cgi/search.pl', {
+      'search_terms': query,
+      'search_simple': '1',
+      'action': 'process',
+      'json': '1',
+      'page_size': '$pageSize',
+      'fields': _fields,
+    });
+    final response = await _client.get(uri, headers: {'User-Agent': userAgent});
+    if (response.statusCode != 200) throw OpenFoodFactsException('HTTP ${response.statusCode}');
+    final json = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    final products = (json['products'] as List?) ?? const [];
+    return [
+      for (final p in products.whereType<Map<String, dynamic>>())
+        if (_text(p['code']) case final code?)
+          if (parseProduct(code, p) case final food when food.kcal.value != null) food,
+    ];
   }
 }
 

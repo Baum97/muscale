@@ -49,4 +49,14 @@ void main() {
     final weights = await db.watchWeights().first;
     expect(weights.single.kg, 84.9);
   });
+
+  test('Suche in gespeicherten Lebensmitteln nach Name und Marke', () async {
+    await db.upsertFood(oats());
+    await db.upsertFood(
+      FoodsCompanion.insert(name: 'Skyr Natur', brand: const Value('Arla'), source: FoodSource.custom),
+    );
+    expect((await db.searchFoods('hafer')).map((f) => f.name), ['Haferflocken']);
+    expect((await db.searchFoods('arla')).map((f) => f.name), ['Skyr Natur']);
+    expect(await db.searchFoods('pizza'), isEmpty);
+  });
 }

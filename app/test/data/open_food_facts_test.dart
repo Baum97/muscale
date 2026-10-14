@@ -71,4 +71,34 @@ void main() {
     test('per Packungsgröße', () => expect(isLiquidProduct({'quantity': '1,5 l'}), isTrue));
     test('fest', () => expect(isLiquidProduct({'quantity': '250 g'}), isFalse));
   });
+
+  test('Suche liefert nur Produkte mit Barcode und Kalorien', () async {
+    late Uri uri;
+    final client = MockClient((r) async {
+      uri = r.url;
+      return http.Response.bytes(
+        utf8.encode(
+          jsonEncode({
+            'products': [
+              {
+                'code': '111',
+                'product_name': 'Skyr',
+                'nutriments': {'energy-kcal_100g': 63, 'proteins_100g': 11},
+              },
+              {'code': '222', 'product_name': 'Ohne Nährwerte'},
+              {
+                'product_name': 'Ohne Barcode',
+                'nutriments': {'energy-kcal_100g': 100},
+              },
+            ],
+          }),
+        ),
+        200,
+      );
+    });
+    final results = await OpenFoodFacts(client: client).search('skyr');
+    expect(uri.queryParameters['search_terms'], 'skyr');
+    expect(results.map((f) => f.name.value), ['Skyr']);
+    expect(results.single.barcode.value, '111');
+  });
 }
