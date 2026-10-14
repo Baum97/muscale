@@ -52,6 +52,8 @@ class Foods extends Table {
 
   /// Nur Rezepte: Gewicht des fertigen Gerichts in g.
   RealColumn get recipeTotalWeight => real().nullable()();
+
+  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
   RealColumn get kcal => real().nullable()();
   RealColumn get protein => real().nullable()();
   RealColumn get carbs => real().nullable()();
@@ -139,7 +141,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'muscale'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -148,6 +150,7 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(foods, foods.recipeTotalWeight);
         await m.createTable(recipeIngredients);
       }
+      if (from < 3) await m.addColumn(foods, foods.isFavorite);
     },
   );
 
@@ -199,6 +202,20 @@ class AppDatabase extends _$AppDatabase {
       ..limit(limit);
     return query.watch().map((rows) => [for (final r in rows) r.readTable(foods)]);
   }
+
+  // Favoriten
+
+  Stream<List<Food>> watchFavorites() =>
+      (select(foods)
+            ..where((f) => f.isFavorite.equals(true))
+            ..orderBy([(f) => OrderingTerm.asc(f.name)]))
+          .watch();
+
+  Stream<bool> watchIsFavorite(int foodId) =>
+      (select(foods)..where((f) => f.id.equals(foodId))).watchSingle().map((f) => f.isFavorite);
+
+  Future<void> setFavorite(int foodId, bool favorite) =>
+      (update(foods)..where((f) => f.id.equals(foodId))).write(FoodsCompanion(isFavorite: Value(favorite)));
 
   // Rezepte
 

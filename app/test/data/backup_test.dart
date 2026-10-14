@@ -80,4 +80,14 @@ void main() {
       throwsA(isA<BackupException>().having((e) => e.message, 'message', contains('neueren'))),
     );
   });
+
+  test('Ältere Sicherung ohne neue Spalten lässt sich importieren', () async {
+    await fill(source);
+    final json = (await exportBackup(source))
+        .replaceAll(RegExp(r'\s*"isFavorite": (true|false),?'), '')
+        .replaceAll(RegExp(r'\s*"recipeTotalWeight": [^,}]*,?'), '');
+    expect(json, isNot(contains('isFavorite')));
+    await importBackup(target, json);
+    expect((await target.select(target.foods).get()).map((f) => f.isFavorite), everyElement(isFalse));
+  });
 }

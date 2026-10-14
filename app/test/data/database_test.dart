@@ -108,7 +108,7 @@ void main() {
         raw.execute('PRAGMA user_version = 1');
       },
     );
-    final migrated = AppDatabase(v1);
+    final migrated = AppDatabase(v1); // Version 1 → aktuelle Version
     addTearDown(migrated.close);
     final old = (await migrated.select(migrated.foods).get()).single;
     expect(old.name, 'Alt');
@@ -119,5 +119,15 @@ void main() {
       ingredients: [Ingredient(old, 100)],
     );
     expect(recipe.kcal, 100);
+  });
+
+  test('Favoriten markieren und wieder entfernen', () async {
+    final food = await db.upsertFood(oats());
+    expect(await db.watchFavorites().first, isEmpty);
+    await db.setFavorite(food.id, true);
+    expect((await db.watchFavorites().first).single.name, 'Haferflocken');
+    expect(await db.watchIsFavorite(food.id).first, isTrue);
+    await db.setFavorite(food.id, false);
+    expect(await db.watchFavorites().first, isEmpty);
   });
 }

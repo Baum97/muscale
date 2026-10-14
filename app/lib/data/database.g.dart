@@ -676,6 +676,21 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
         type: DriftSqlType.double,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+    'is_favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _kcalMeta = const VerificationMeta('kcal');
   @override
   late final GeneratedColumn<double> kcal = GeneratedColumn<double>(
@@ -796,6 +811,7 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
     servingSize,
     source,
     recipeTotalWeight,
+    isFavorite,
     kcal,
     protein,
     carbs,
@@ -865,6 +881,12 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
           data['recipe_total_weight']!,
           _recipeTotalWeightMeta,
         ),
+      );
+    }
+    if (data.containsKey('is_favorite')) {
+      context.handle(
+        _isFavoriteMeta,
+        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
       );
     }
     if (data.containsKey('kcal')) {
@@ -985,6 +1007,10 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
         DriftSqlType.double,
         data['${effectivePrefix}recipe_total_weight'],
       ),
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
       kcal: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}kcal'],
@@ -1052,6 +1078,7 @@ class Food extends DataClass implements Insertable<Food> {
 
   /// Nur Rezepte: Gewicht des fertigen Gerichts in g.
   final double? recipeTotalWeight;
+  final bool isFavorite;
   final double? kcal;
   final double? protein;
   final double? carbs;
@@ -1072,6 +1099,7 @@ class Food extends DataClass implements Insertable<Food> {
     this.servingSize,
     required this.source,
     this.recipeTotalWeight,
+    required this.isFavorite,
     this.kcal,
     this.protein,
     this.carbs,
@@ -1105,6 +1133,7 @@ class Food extends DataClass implements Insertable<Food> {
     if (!nullToAbsent || recipeTotalWeight != null) {
       map['recipe_total_weight'] = Variable<double>(recipeTotalWeight);
     }
+    map['is_favorite'] = Variable<bool>(isFavorite);
     if (!nullToAbsent || kcal != null) {
       map['kcal'] = Variable<double>(kcal);
     }
@@ -1157,6 +1186,7 @@ class Food extends DataClass implements Insertable<Food> {
       recipeTotalWeight: recipeTotalWeight == null && nullToAbsent
           ? const Value.absent()
           : Value(recipeTotalWeight),
+      isFavorite: Value(isFavorite),
       kcal: kcal == null && nullToAbsent ? const Value.absent() : Value(kcal),
       protein: protein == null && nullToAbsent
           ? const Value.absent()
@@ -1203,6 +1233,7 @@ class Food extends DataClass implements Insertable<Food> {
       recipeTotalWeight: serializer.fromJson<double?>(
         json['recipeTotalWeight'],
       ),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
       kcal: serializer.fromJson<double?>(json['kcal']),
       protein: serializer.fromJson<double?>(json['protein']),
       carbs: serializer.fromJson<double?>(json['carbs']),
@@ -1234,6 +1265,7 @@ class Food extends DataClass implements Insertable<Food> {
         $FoodsTable.$convertersource.toJson(source),
       ),
       'recipeTotalWeight': serializer.toJson<double?>(recipeTotalWeight),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
       'kcal': serializer.toJson<double?>(kcal),
       'protein': serializer.toJson<double?>(protein),
       'carbs': serializer.toJson<double?>(carbs),
@@ -1257,6 +1289,7 @@ class Food extends DataClass implements Insertable<Food> {
     Value<double?> servingSize = const Value.absent(),
     FoodSource? source,
     Value<double?> recipeTotalWeight = const Value.absent(),
+    bool? isFavorite,
     Value<double?> kcal = const Value.absent(),
     Value<double?> protein = const Value.absent(),
     Value<double?> carbs = const Value.absent(),
@@ -1279,6 +1312,7 @@ class Food extends DataClass implements Insertable<Food> {
     recipeTotalWeight: recipeTotalWeight.present
         ? recipeTotalWeight.value
         : this.recipeTotalWeight,
+    isFavorite: isFavorite ?? this.isFavorite,
     kcal: kcal.present ? kcal.value : this.kcal,
     protein: protein.present ? protein.value : this.protein,
     carbs: carbs.present ? carbs.value : this.carbs,
@@ -1309,6 +1343,9 @@ class Food extends DataClass implements Insertable<Food> {
       recipeTotalWeight: data.recipeTotalWeight.present
           ? data.recipeTotalWeight.value
           : this.recipeTotalWeight,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
       kcal: data.kcal.present ? data.kcal.value : this.kcal,
       protein: data.protein.present ? data.protein.value : this.protein,
       carbs: data.carbs.present ? data.carbs.value : this.carbs,
@@ -1340,6 +1377,7 @@ class Food extends DataClass implements Insertable<Food> {
           ..write('servingSize: $servingSize, ')
           ..write('source: $source, ')
           ..write('recipeTotalWeight: $recipeTotalWeight, ')
+          ..write('isFavorite: $isFavorite, ')
           ..write('kcal: $kcal, ')
           ..write('protein: $protein, ')
           ..write('carbs: $carbs, ')
@@ -1365,6 +1403,7 @@ class Food extends DataClass implements Insertable<Food> {
     servingSize,
     source,
     recipeTotalWeight,
+    isFavorite,
     kcal,
     protein,
     carbs,
@@ -1389,6 +1428,7 @@ class Food extends DataClass implements Insertable<Food> {
           other.servingSize == this.servingSize &&
           other.source == this.source &&
           other.recipeTotalWeight == this.recipeTotalWeight &&
+          other.isFavorite == this.isFavorite &&
           other.kcal == this.kcal &&
           other.protein == this.protein &&
           other.carbs == this.carbs &&
@@ -1411,6 +1451,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
   final Value<double?> servingSize;
   final Value<FoodSource> source;
   final Value<double?> recipeTotalWeight;
+  final Value<bool> isFavorite;
   final Value<double?> kcal;
   final Value<double?> protein;
   final Value<double?> carbs;
@@ -1431,6 +1472,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     this.servingSize = const Value.absent(),
     this.source = const Value.absent(),
     this.recipeTotalWeight = const Value.absent(),
+    this.isFavorite = const Value.absent(),
     this.kcal = const Value.absent(),
     this.protein = const Value.absent(),
     this.carbs = const Value.absent(),
@@ -1452,6 +1494,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     this.servingSize = const Value.absent(),
     required FoodSource source,
     this.recipeTotalWeight = const Value.absent(),
+    this.isFavorite = const Value.absent(),
     this.kcal = const Value.absent(),
     this.protein = const Value.absent(),
     this.carbs = const Value.absent(),
@@ -1474,6 +1517,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     Expression<double>? servingSize,
     Expression<int>? source,
     Expression<double>? recipeTotalWeight,
+    Expression<bool>? isFavorite,
     Expression<double>? kcal,
     Expression<double>? protein,
     Expression<double>? carbs,
@@ -1495,6 +1539,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
       if (servingSize != null) 'serving_size': servingSize,
       if (source != null) 'source': source,
       if (recipeTotalWeight != null) 'recipe_total_weight': recipeTotalWeight,
+      if (isFavorite != null) 'is_favorite': isFavorite,
       if (kcal != null) 'kcal': kcal,
       if (protein != null) 'protein': protein,
       if (carbs != null) 'carbs': carbs,
@@ -1520,6 +1565,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     Value<double?>? servingSize,
     Value<FoodSource>? source,
     Value<double?>? recipeTotalWeight,
+    Value<bool>? isFavorite,
     Value<double?>? kcal,
     Value<double?>? protein,
     Value<double?>? carbs,
@@ -1541,6 +1587,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
       servingSize: servingSize ?? this.servingSize,
       source: source ?? this.source,
       recipeTotalWeight: recipeTotalWeight ?? this.recipeTotalWeight,
+      isFavorite: isFavorite ?? this.isFavorite,
       kcal: kcal ?? this.kcal,
       protein: protein ?? this.protein,
       carbs: carbs ?? this.carbs,
@@ -1583,6 +1630,9 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     }
     if (recipeTotalWeight.present) {
       map['recipe_total_weight'] = Variable<double>(recipeTotalWeight.value);
+    }
+    if (isFavorite.present) {
+      map['is_favorite'] = Variable<bool>(isFavorite.value);
     }
     if (kcal.present) {
       map['kcal'] = Variable<double>(kcal.value);
@@ -1631,6 +1681,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
           ..write('servingSize: $servingSize, ')
           ..write('source: $source, ')
           ..write('recipeTotalWeight: $recipeTotalWeight, ')
+          ..write('isFavorite: $isFavorite, ')
           ..write('kcal: $kcal, ')
           ..write('protein: $protein, ')
           ..write('carbs: $carbs, ')
@@ -3027,6 +3078,7 @@ typedef $$FoodsTableCreateCompanionBuilder = FoodsCompanion Function({
   Value<double?> servingSize,
   required FoodSource source,
   Value<double?> recipeTotalWeight,
+  Value<bool> isFavorite,
   Value<double?> kcal,
   Value<double?> protein,
   Value<double?> carbs,
@@ -3048,6 +3100,7 @@ typedef $$FoodsTableUpdateCompanionBuilder = FoodsCompanion Function({
   Value<double?> servingSize,
   Value<FoodSource> source,
   Value<double?> recipeTotalWeight,
+  Value<bool> isFavorite,
   Value<double?> kcal,
   Value<double?> protein,
   Value<double?> carbs,
@@ -3130,6 +3183,11 @@ class $$FoodsTableFilterComposer extends Composer<_$AppDatabase, $FoodsTable> {
 
   ColumnFilters<double> get recipeTotalWeight => $composableBuilder(
     column: $table.recipeTotalWeight,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3263,6 +3321,11 @@ class $$FoodsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get kcal => $composableBuilder(
     column: $table.kcal,
     builder: (column) => ColumnOrderings(column),
@@ -3353,6 +3416,11 @@ class $$FoodsTableAnnotationComposer
 
   GeneratedColumn<double> get recipeTotalWeight => $composableBuilder(
     column: $table.recipeTotalWeight,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
     builder: (column) => column,
   );
 
@@ -3457,6 +3525,7 @@ class $$FoodsTableTableManager
                 Value<double?> servingSize = const Value.absent(),
                 Value<FoodSource> source = const Value.absent(),
                 Value<double?> recipeTotalWeight = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
                 Value<double?> kcal = const Value.absent(),
                 Value<double?> protein = const Value.absent(),
                 Value<double?> carbs = const Value.absent(),
@@ -3477,6 +3546,7 @@ class $$FoodsTableTableManager
                 servingSize: servingSize,
                 source: source,
                 recipeTotalWeight: recipeTotalWeight,
+                isFavorite: isFavorite,
                 kcal: kcal,
                 protein: protein,
                 carbs: carbs,
@@ -3499,6 +3569,7 @@ class $$FoodsTableTableManager
                 Value<double?> servingSize = const Value.absent(),
                 required FoodSource source,
                 Value<double?> recipeTotalWeight = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
                 Value<double?> kcal = const Value.absent(),
                 Value<double?> protein = const Value.absent(),
                 Value<double?> carbs = const Value.absent(),
@@ -3519,6 +3590,7 @@ class $$FoodsTableTableManager
                 servingSize: servingSize,
                 source: source,
                 recipeTotalWeight: recipeTotalWeight,
+                isFavorite: isFavorite,
                 kcal: kcal,
                 protein: protein,
                 carbs: carbs,

@@ -59,7 +59,8 @@ Future<void> importBackup(AppDatabase db, String text) async {
   final List<RecipeIngredient> ingredients;
   try {
     profiles = rows('profiles').map(Profile.fromJson).toList();
-    foods = rows('foods').map(Food.fromJson).toList();
+    // Ältere Sicherungen kennen neuere Spalten noch nicht.
+    foods = rows('foods').map((r) => Food.fromJson({'recipeTotalWeight': null, 'isFavorite': false, ...r})).toList();
     entries = rows('diaryEntries').map(DiaryEntry.fromJson).toList();
     completed = rows('completedDays').map(CompletedDay.fromJson).toList();
     weights = rows('weightEntries').map(WeightEntry.fromJson).toList();

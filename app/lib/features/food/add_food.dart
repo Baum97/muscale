@@ -50,6 +50,7 @@ class _FoodPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     bool keep(Food f) => f.id != excludeId;
+    final favorites = (ref.watch(favoritesProvider).value ?? const <Food>[]).where(keep).toList();
     final recipes = (ref.watch(recipesProvider).value ?? const <Food>[]).where(keep).toList();
     final recent = (ref.watch(recentFoodsProvider).value ?? const <Food>[]).where(keep).toList();
     return DraggableScrollableSheet(
@@ -81,6 +82,11 @@ class _FoodPicker extends ConsumerWidget {
               title: const Text('Neues Rezept'),
               onTap: () => _via(context, () => _push(context, const RecipeScreen())),
             ),
+          if (favorites.isNotEmpty) ...[
+            const Divider(),
+            const ListTile(dense: true, title: Text('Favoriten')),
+            for (final food in favorites) _FoodTile(food, onTap: () => Navigator.of(context).pop(food)),
+          ],
           if (recipes.isNotEmpty) ...[
             const Divider(),
             const ListTile(dense: true, title: Text('Meine Rezepte')),
@@ -191,7 +197,12 @@ class _AmountSheetState extends ConsumerState<_AmountSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(food.name, style: Theme.of(context).textTheme.titleLarge),
+          Row(
+            children: [
+              Expanded(child: Text(food.name, style: Theme.of(context).textTheme.titleLarge)),
+              _FavoriteButton(foodId: food.id),
+            ],
+          ),
           if (food.brand != null) Text(food.brand!),
           const SizedBox(height: 16),
           Wrap(
@@ -229,6 +240,21 @@ class _AmountSheetState extends ConsumerState<_AmountSheet> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _FavoriteButton extends ConsumerWidget {
+  const _FavoriteButton({required this.foodId});
+  final int foodId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favorite = ref.watch(isFavoriteProvider(foodId)).value ?? false;
+    return IconButton(
+      tooltip: favorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten',
+      icon: Icon(favorite ? Icons.star : Icons.star_border),
+      onPressed: () => ref.read(databaseProvider).setFavorite(foodId, !favorite),
     );
   }
 }

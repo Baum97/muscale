@@ -11,6 +11,7 @@ import '../../domain/days.dart';
 import '../../providers.dart';
 import '../../widgets/format.dart';
 import '../food/recipe_screen.dart';
+import '../info/info_screen.dart';
 import '../onboarding/profile_form_screen.dart';
 import '../weight/scale_actions.dart';
 
@@ -88,6 +89,13 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => _import(context, ref),
           ),
           const Divider(),
+          ListTile(
+            leading: const Icon(Icons.school_outlined),
+            title: const Text('Wissen'),
+            subtitle: const Text('Eiweiß, Zucker vs. Stärke, Fettqualität, Wiegen'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InfoScreen())),
+          ),
           ListTile(
             leading: const Icon(Icons.code),
             title: const Text('Quellcode (GPL-3.0)'),

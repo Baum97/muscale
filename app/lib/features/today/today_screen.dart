@@ -10,6 +10,7 @@ import '../../providers.dart';
 import '../../theme.dart';
 import '../../widgets/format.dart';
 import '../food/add_food.dart';
+import '../info/info_screen.dart';
 
 class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key});
@@ -28,6 +29,11 @@ class TodayScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(isToday ? 'Heute' : weekdayDate(day)),
         actions: [
+          IconButton(
+            tooltip: 'Wissen',
+            icon: const Icon(Icons.school_outlined),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InfoScreen())),
+          ),
           IconButton(
             tooltip: 'Vorheriger Tag',
             icon: const Icon(Icons.chevron_left),
