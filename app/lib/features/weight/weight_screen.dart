@@ -149,7 +149,7 @@ class _CheckInCard extends ConsumerWidget {
     final List<Widget> body;
     if (!e.isValid) {
       body = [
-        Text('Noch nicht genug Daten für $range.'),
+        Text('Noch nicht genug Daten für $range'),
         const SizedBox(height: 4),
         Text('Vollständige Tage: ${e.completeDays} von mindestens $minCompleteDays'),
         Text('Wiegungen: ${e.weighIns} von mindestens $minWeighIns'),

@@ -31,114 +31,116 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Einstellungen')),
       body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         children: [
-          if (profile != null)
+          _Section('Du', [
+            if (profile != null)
+              ListTile(
+                leading: const Icon(Icons.person_outline),
+                title: const Text('Profil und Ziel'),
+                subtitle: Text(
+                  [profile.goal.label, if (targets != null) '${kcal(targets.calorieTarget)} pro Tag'].join(' · '),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileFormScreen())),
+              ),
+            if (profile?.calorieTargetOverride != null)
+              ListTile(
+                leading: const Icon(Icons.restart_alt),
+                title: const Text('Zurück zur Startschätzung'),
+                subtitle: const Text('Verwirft das Tagesziel aus dem Check-in.'),
+                onTap: () => ref.read(databaseProvider).setCalorieTargetOverride(null),
+              ),
             ListTile(
-              leading: const Icon(Icons.person_outline),
-              title: const Text('Profil und Ziel'),
+              leading: const Icon(Icons.menu_book_outlined),
+              title: const Text('Meine Rezepte'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RecipesScreen())),
+            ),
+            SwitchListTile(
+              secondary: const Icon(Icons.monitor_weight_outlined),
+              title: const Text('Waage (Health Connect)'),
+              subtitle: const Text('Gewicht aus deiner Waagen-App'),
+              value: ref.watch(scaleEnabledProvider),
+              onChanged: (on) => on ? connectScale(context, ref) : ref.read(scaleEnabledProvider.notifier).set(false),
+            ),
+          ]),
+          _Section('Erinnerungen', [for (final kind in ReminderKind.values) _ReminderTile(kind)]),
+          _Section('App', [
+            ListTile(
+              leading: const Icon(Icons.palette_outlined),
+              title: const Text('Darstellung'),
               subtitle: Text(
-                [profile.goal.label, if (targets != null) '${kcal(targets.calorieTarget)} pro Tag'].join(' · '),
+                '${palette.primary.label} · ${palette.accent.label} · ${switch (themeMode) {
+                  ThemeMode.light => 'Hell',
+                  ThemeMode.dark => 'Dunkel',
+                  ThemeMode.system => 'System',
+                }}',
               ),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileFormScreen())),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AppearanceScreen())),
             ),
-          if (profile?.calorieTargetOverride != null)
+            const _DonationTile(),
+          ]),
+          _Section('Datensicherung', [
             ListTile(
-              leading: const Icon(Icons.restart_alt),
-              title: const Text('Zurück zur Startschätzung'),
-              subtitle: const Text('Verwirft das Tagesziel aus dem Check-in.'),
-              onTap: () => ref.read(databaseProvider).setCalorieTargetOverride(null),
+              leading: const Icon(Icons.upload_file),
+              title: const Text('Daten exportieren'),
+              subtitle: const Text('Speichert alle Daten als Datei, z. B. für ein neues Handy.'),
+              onTap: () => _export(context, ref),
             ),
-          ListTile(
-            leading: const Icon(Icons.menu_book_outlined),
-            title: const Text('Meine Rezepte'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RecipesScreen())),
-          ),
-          SwitchListTile(
-            secondary: const Icon(Icons.monitor_weight_outlined),
-            title: const Text('Waage (Health Connect)'),
-            subtitle: const Text('Gewicht automatisch von deiner Waagen-App übernehmen'),
-            value: ref.watch(scaleEnabledProvider),
-            onChanged: (on) => on ? connectScale(context, ref) : ref.read(scaleEnabledProvider.notifier).set(false),
-          ),
-          const Divider(),
-          const ListTile(title: Text('Erinnerungen')),
-          for (final kind in ReminderKind.values) _ReminderTile(kind),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.palette_outlined),
-            title: const Text('Darstellung'),
-            subtitle: Text(
-              '${palette.primary.label} · ${palette.accent.label} · ${switch (themeMode) {
-                ThemeMode.light => 'Hell',
-                ThemeMode.dark => 'Dunkel',
-                ThemeMode.system => 'System',
-              }}',
+            ListTile(
+              leading: const Icon(Icons.table_chart_outlined),
+              title: const Text('Tagebuch als CSV'),
+              subtitle: const Text('Für Excel oder LibreOffice'),
+              onTap: () => _exportCsv(context, ref, 'tagebuch', diaryCsv),
             ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AppearanceScreen())),
-          ),
-          const Divider(),
-          const _DonationTile(),
-          const Divider(),
-          const ListTile(title: Text('Datensicherung')),
-          ListTile(
-            leading: const Icon(Icons.upload_file),
-            title: const Text('Daten exportieren'),
-            subtitle: const Text('Speichert alle Daten als Datei, z. B. für ein neues Handy.'),
-            onTap: () => _export(context, ref),
-          ),
-          ListTile(
-            leading: const Icon(Icons.table_chart_outlined),
-            title: const Text('Tagebuch als CSV'),
-            subtitle: const Text('Für Excel oder LibreOffice'),
-            onTap: () => _exportCsv(context, ref, 'tagebuch', diaryCsv),
-          ),
-          ListTile(
-            leading: const Icon(Icons.show_chart),
-            title: const Text('Gewicht als CSV'),
-            onTap: () => _exportCsv(context, ref, 'gewicht', weightCsv),
-          ),
-          ListTile(
-            leading: const Icon(Icons.download),
-            title: const Text('Daten importieren'),
-            subtitle: const Text('Ersetzt alle Daten auf diesem Gerät durch eine Sicherung.'),
-            onTap: () => _import(context, ref),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.school_outlined),
-            title: const Text('Wissen'),
-            subtitle: const Text('Eiweiß, Zucker vs. Stärke, Fettqualität, Wiegen'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InfoScreen())),
-          ),
-          ListTile(
-            leading: const Icon(Icons.code),
-            title: const Text('Quellcode (GPL-3.0)'),
-            subtitle: const Text(sourceCodeUrl),
-            onTap: () => launchUrl(Uri.parse(sourceCodeUrl), mode: LaunchMode.externalApplication),
-          ),
-          ListTile(
-            leading: const Icon(Icons.storage_outlined),
-            title: const Text('Produktdaten: Open Food Facts'),
-            subtitle: const Text('Freie Datenbank unter der Open Database License (ODbL)'),
-            onTap: () => launchUrl(Uri.parse(openFoodFactsUrl), mode: LaunchMode.externalApplication),
-          ),
-          const ListTile(
-            leading: Icon(Icons.lock_outline),
-            title: Text('Datenschutz'),
-            subtitle: Text(
-              'Alle Daten bleiben auf diesem Gerät. Ins Internet geht nur der gescannte Barcode '
-              '(an Open Food Facts). Kein Konto, kein Tracking, keine Werbung.',
+            ListTile(
+              leading: const Icon(Icons.show_chart),
+              title: const Text('Gewicht als CSV'),
+              onTap: () => _exportCsv(context, ref, 'gewicht', weightCsv),
             ),
-          ),
-          const AboutListTile(
-            icon: Icon(Icons.info_outline),
-            applicationName: 'MuScale',
-            applicationLegalese: 'GPL-3.0 · Kommerzielle Lizenz auf Anfrage',
-          ),
+            ListTile(
+              leading: const Icon(Icons.download),
+              title: const Text('Daten importieren'),
+              subtitle: const Text('Ersetzt alle Daten auf diesem Gerät durch eine Sicherung.'),
+              onTap: () => _import(context, ref),
+            ),
+          ]),
+          _Section('Info', [
+            ListTile(
+              leading: const Icon(Icons.school_outlined),
+              title: const Text('Wissen'),
+              subtitle: const Text('Eiweiß, Zucker vs. Stärke, Fettqualität, Wiegen'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InfoScreen())),
+            ),
+            ListTile(
+              leading: const Icon(Icons.code),
+              title: const Text('Quellcode (GPL-3.0)'),
+              subtitle: const Text(sourceCodeUrl),
+              onTap: () => launchUrl(Uri.parse(sourceCodeUrl), mode: LaunchMode.externalApplication),
+            ),
+            ListTile(
+              leading: const Icon(Icons.storage_outlined),
+              title: const Text('Produktdaten: Open Food Facts'),
+              subtitle: const Text('Freie Datenbank unter der Open Database License (ODbL)'),
+              onTap: () => launchUrl(Uri.parse(openFoodFactsUrl), mode: LaunchMode.externalApplication),
+            ),
+            const ListTile(
+              leading: Icon(Icons.lock_outline),
+              title: Text('Datenschutz'),
+              subtitle: Text(
+                'Alle Daten bleiben auf diesem Gerät. Ins Internet geht nur der gescannte Barcode '
+                '(an Open Food Facts). Kein Konto, kein Tracking, keine Werbung.',
+              ),
+            ),
+            const AboutListTile(
+              icon: Icon(Icons.info_outline),
+              applicationName: 'MuScale',
+              applicationLegalese: 'GPL-3.0 · Kommerzielle Lizenz auf Anfrage',
+            ),
+          ]),
         ],
       ),
     );
@@ -261,6 +263,28 @@ class _ReminderTile extends ConsumerWidget {
       ),
       value: setting.enabled,
       onChanged: (on) => _set(context, ref, enabled: on),
+    );
+  }
+}
+
+/// Abschnitt: Überschrift in der Hauptfarbe, Einträge gesammelt in einer Karte.
+class _Section extends StatelessWidget {
+  const _Section(this.title, this.children);
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
+          child: Text(title, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary)),
+        ),
+        Card(child: Column(children: children)),
+      ],
     );
   }
 }
