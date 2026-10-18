@@ -12,10 +12,12 @@ class MuScaleApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = ref.watch(paletteProvider);
     return MaterialApp(
       title: 'MuScale',
-      theme: buildTheme(Brightness.light),
-      darkTheme: buildTheme(Brightness.dark),
+      debugShowCheckedModeBanner: false,
+      theme: buildTheme(Brightness.light, palette),
+      darkTheme: buildTheme(Brightness.dark, palette),
       themeMode: ref.watch(themeModeProvider),
       locale: const Locale('de'),
       supportedLocales: const [Locale('de')],

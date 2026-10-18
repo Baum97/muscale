@@ -9,6 +9,7 @@ import '../../domain/targets.dart';
 import '../../providers.dart';
 import '../../theme.dart';
 import '../../widgets/format.dart';
+import '../../widgets/progress_ring.dart';
 import '../food/add_food.dart';
 import '../info/info_screen.dart';
 
@@ -65,6 +66,7 @@ class TodayScreen extends ConsumerWidget {
             _MealSection(meal: meal, day: key, entries: entries.where((e) => e.entry.meal == meal).toList()),
           const SizedBox(height: 8),
           Card(
+            color: complete ? Theme.of(context).colorScheme.secondaryContainer : null,
             child: CheckboxListTile(
               value: complete,
               onChanged: (v) => ref.read(databaseProvider).setDayComplete(key, v ?? false),
@@ -86,34 +88,44 @@ Meal _mealForNow() {
   return Meal.snacks;
 }
 
-class _SummaryCard extends StatelessWidget {
+class _SummaryCard extends ConsumerWidget {
   const _SummaryCard({required this.totals, required this.targets});
   final NutrientTotals totals;
   final Targets targets;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final left = targets.calorieTarget - totals.kcal.round();
+    final scheme = theme.colorScheme;
+    final b = theme.brightness;
+    final eaten = totals.kcal.round();
+    final left = targets.calorieTarget - eaten;
     final m = targets.macros;
+    final numberStyle = theme.textTheme.displaySmall?.copyWith(fontFeatures: tabularFigures, height: 1);
+
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
         child: Column(
           children: [
             Row(
               children: [
-                SizedBox.square(
-                  dimension: 96,
-                  child: Stack(
-                    fit: StackFit.expand,
+                ProgressRing(
+                  progress: eaten / targets.calorieTarget,
+                  colors: ringColors(scheme, ref.watch(paletteProvider)),
+                  size: 156,
+                  strokeWidth: 16,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(
-                        value: (totals.kcal / targets.calorieTarget).clamp(0, 1),
-                        strokeWidth: 10,
-                        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      Text(number(left.abs().toDouble()), style: numberStyle),
+                      const SizedBox(height: 2),
+                      Text(
+                        left >= 0 ? 'kcal übrig' : 'kcal drüber',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: left >= 0 ? scheme.onSurfaceVariant : scheme.error,
+                        ),
                       ),
-                      Center(child: Text(number(totals.kcal.roundToDouble()), style: theme.textTheme.titleLarge)),
                     ],
                   ),
                 ),
@@ -122,54 +134,90 @@ class _SummaryCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Ziel ${kcal(targets.calorieTarget)}', style: theme.textTheme.titleMedium),
-                      Text(left >= 0 ? 'Noch ${kcal(left)}' : '${kcal(-left)} drüber'),
-                      Text(
-                        targets.fromCheckIn ? 'Aus deinem Check-in' : 'Startschätzung',
-                        style: theme.textTheme.bodySmall,
+                      _Stat(label: 'Gegessen', value: kcal(eaten)),
+                      const SizedBox(height: 12),
+                      _Stat(label: 'Tagesziel', value: kcal(targets.calorieTarget)),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: scheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: Text(
+                          targets.fromCheckIn ? 'Aus deinem Check-in' : 'Startschätzung',
+                          style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSecondaryContainer),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            _MacroTile(
-              label: 'Eiweiß',
-              color: AppColors.protein,
-              value: totals.protein,
-              target: m.protein,
-              details: const [],
-            ),
-            _MacroTile(
-              label: 'Kohlenhydrate',
-              color: AppColors.carbs,
-              value: totals.carbs,
-              target: m.carbs,
-              details: [
-                ('Kurzkettig (Zucker)', grams(totals.sugar)),
-                ('Langkettig (Stärke) ≈', grams(totals.starch)),
-                ('Ballaststoffe (Richtwert ${grams(MacroTargets.fiberGuide)})', grams(totals.fiber)),
-              ],
-            ),
-            _MacroTile(
-              label: 'Fett',
-              color: AppColors.fat,
-              value: totals.fat,
-              target: m.fat,
-              details: [
-                (
-                  'Gesättigt (< ${grams(MacroTargets.saturatedFatLimit(targets.calorieTarget.toDouble()).roundToDouble())})',
-                  grams(totals.saturatedFat),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: _MacroGauge(
+                    label: 'Eiweiß',
+                    color: MacroColors.protein(b),
+                    value: totals.protein,
+                    target: m.protein,
+                  ),
                 ),
-                ('Ungesättigt ≈', grams(totals.unsaturatedFat)),
+                Expanded(
+                  child: _MacroGauge(
+                    label: 'Kohlenhydrate',
+                    color: MacroColors.carbs(b),
+                    value: totals.carbs,
+                    target: m.carbs,
+                  ),
+                ),
+                Expanded(
+                  child: _MacroGauge(label: 'Fett', color: MacroColors.fat(b), value: totals.fat, target: m.fat),
+                ),
               ],
             ),
-            if (totals.incomplete)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text('Bei manchen Lebensmitteln fehlen Angaben.', style: theme.textTheme.bodySmall),
+            Theme(
+              data: theme.copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 12),
+                title: Text('Details', style: theme.textTheme.labelLarge),
+                children: [
+                  _DetailGroup(
+                    title: 'Kohlenhydrate',
+                    color: MacroColors.carbs(b),
+                    rows: [
+                      ('Kurzkettig (Zucker)', grams(totals.sugar)),
+                      ('Langkettig (Stärke) ≈', grams(totals.starch)),
+                      ('Ballaststoffe · Richtwert ${grams(MacroTargets.fiberGuide)}', grams(totals.fiber)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _DetailGroup(
+                    title: 'Fett',
+                    color: MacroColors.fat(b),
+                    rows: [
+                      (
+                        'Gesättigt · unter '
+                            '${grams(MacroTargets.saturatedFatLimit(targets.calorieTarget.toDouble()).roundToDouble())}',
+                        grams(totals.saturatedFat),
+                      ),
+                      ('Ungesättigt ≈', grams(totals.unsaturatedFat)),
+                    ],
+                  ),
+                  if (totals.incomplete)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        'Bei manchen Lebensmitteln fehlen Angaben.',
+                        style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ),
+                ],
               ),
+            ),
           ],
         ),
       ),
@@ -177,55 +225,92 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
-class _MacroTile extends StatelessWidget {
-  const _MacroTile({
-    required this.label,
-    required this.color,
-    required this.value,
-    required this.target,
-    required this.details,
-  });
+class _Stat extends StatelessWidget {
+  const _Stat({required this.label, required this.value});
+  final String label;
+  final String value;
 
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        Text(value, style: theme.textTheme.titleLarge?.copyWith(fontFeatures: tabularFigures)),
+      ],
+    );
+  }
+}
+
+/// Kleiner Ring pro Makro mit Prozent in der Mitte und „gegessen / Ziel“ darunter.
+class _MacroGauge extends StatelessWidget {
+  const _MacroGauge({required this.label, required this.color, required this.value, required this.target});
   final String label;
   final Color color;
   final double value;
   final double target;
-  final List<(String, String)> details;
 
   @override
   Widget build(BuildContext context) {
-    final bar = Column(
+    final theme = Theme.of(context);
+    final progress = target <= 0 ? 0.0 : value / target;
+    return Column(
+      children: [
+        ProgressRing(
+          progress: progress,
+          colors: [color],
+          size: 64,
+          strokeWidth: 7,
+          child: Text(
+            '${(progress * 100).round()} %',
+            style: theme.textTheme.labelMedium?.copyWith(fontFeatures: tabularFigures),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(label, style: theme.textTheme.labelLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
+        Text(
+          '${number(value.roundToDouble())} / ${grams(target.roundToDouble())}',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontFeatures: tabularFigures,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DetailGroup extends StatelessWidget {
+  const _DetailGroup({required this.title, required this.color, required this.rows});
+  final String title;
+  final Color color;
+  final List<(String, String)> rows;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Expanded(child: Text(label)),
-            Text('${number(value.roundToDouble())} / ${grams(target.roundToDouble())}'),
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 8),
+            Text(title, style: theme.textTheme.labelLarge),
           ],
         ),
-        const SizedBox(height: 4),
-        LinearProgressIndicator(
-          value: target <= 0 ? 0 : (value / target).clamp(0, 1),
-          color: color,
-          minHeight: 6,
-          borderRadius: BorderRadius.circular(3),
-        ),
-      ],
-    );
-    if (details.isEmpty) return Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: bar);
-    return ExpansionTile(
-      tilePadding: EdgeInsets.zero,
-      childrenPadding: const EdgeInsets.only(left: 12, bottom: 8),
-      shape: const Border(),
-      title: bar,
-      children: [
-        for (final (name, v) in details)
+        for (final (name, v) in rows)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
+            padding: const EdgeInsets.only(left: 16, top: 6),
             child: Row(
               children: [
-                Expanded(child: Text(name)),
-                Text(v),
+                Expanded(child: Text(name, style: theme.textTheme.bodyMedium)),
+                Text(v, style: theme.textTheme.bodyMedium?.copyWith(fontFeatures: tabularFigures)),
               ],
             ),
           ),
@@ -240,20 +325,54 @@ class _MealSection extends ConsumerWidget {
   final String day;
   final List<EntryWithFood> entries;
 
+  static IconData _icon(Meal meal) => switch (meal) {
+    Meal.breakfast => Icons.wb_twilight_rounded,
+    Meal.lunch => Icons.lunch_dining_rounded,
+    Meal.dinner => Icons.dinner_dining_rounded,
+    Meal.snacks => Icons.cookie_rounded,
+  };
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final sum = entries.fold<double>(0, (s, e) => s + (e.nutrients.kcal ?? 0));
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Column(
         children: [
-          ListTile(
-            title: Text(meal.label, style: Theme.of(context).textTheme.titleMedium),
-            subtitle: entries.isEmpty ? null : Text(kcal(sum.round())),
-            trailing: IconButton(
-              tooltip: '${meal.label} hinzufügen',
-              icon: const Icon(Icons.add),
-              onPressed: () => showAddFoodSheet(context, day: day, meal: meal),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(12)),
+                  child: Icon(_icon(meal), color: scheme.onSecondaryContainer, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(meal.label, style: theme.textTheme.titleMedium),
+                      Text(
+                        entries.isEmpty ? 'Noch nichts eingetragen' : kcal(sum.round()),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          fontFeatures: tabularFigures,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton.filledTonal(
+                  tooltip: '${meal.label} hinzufügen',
+                  icon: const Icon(Icons.add_rounded),
+                  onPressed: () => showAddFoodSheet(context, day: day, meal: meal),
+                ),
+              ],
             ),
           ),
           for (final e in entries)
@@ -262,18 +381,23 @@ class _MealSection extends ConsumerWidget {
               direction: DismissDirection.endToStart,
               background: Container(
                 alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 16),
-                color: Theme.of(context).colorScheme.errorContainer,
-                child: const Icon(Icons.delete),
+                padding: const EdgeInsets.only(right: 20),
+                color: scheme.errorContainer,
+                child: Icon(Icons.delete_outline, color: scheme.onErrorContainer),
               ),
               onDismissed: (_) => ref.read(databaseProvider).deleteEntry(e.entry.id),
               child: ListTile(
                 dense: true,
-                title: Text(e.food.name),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                title: Text(e.food.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                 subtitle: Text('${number(e.entry.amount)} ${e.food.isLiquid ? 'ml' : 'g'}'),
-                trailing: Text(kcal(e.nutrients.kcal?.round())),
+                trailing: Text(
+                  kcal(e.nutrients.kcal?.round()),
+                  style: theme.textTheme.labelLarge?.copyWith(fontFeatures: tabularFigures),
+                ),
               ),
             ),
+          if (entries.isNotEmpty) const SizedBox(height: 8),
         ],
       ),
     );

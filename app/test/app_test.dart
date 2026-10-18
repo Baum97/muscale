@@ -32,7 +32,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Heute'), findsOneWidget);
-    expect(find.text('Ziel 2.840 kcal'), findsOneWidget);
+    expect(find.text('Tagesziel'), findsOneWidget);
+    expect(find.text('2.840 kcal'), findsOneWidget);
+    expect(find.text('kcal übrig'), findsOneWidget);
     expect(find.text('Startschätzung'), findsOneWidget);
     final weights = await tester.runAsync(() => db.select(db.weightEntries).get());
     expect(weights!.single.kg, 85);

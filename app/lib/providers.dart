@@ -6,6 +6,7 @@ import 'data/database.dart';
 import 'data/open_food_facts.dart';
 import 'data/scale_sync.dart';
 import 'services/reminders.dart';
+import 'theme.dart';
 import 'domain/days.dart';
 import 'domain/targets.dart';
 import 'domain/trend.dart';
@@ -119,6 +120,45 @@ final checkInProvider = FutureProvider<CheckIn?>((ref) async {
 });
 
 // Darstellung
+
+/// Gewählte Haupt- und Akzentfarbe.
+final paletteProvider = NotifierProvider<PaletteSetting, AppPalette>(PaletteSetting.new);
+
+class PaletteSetting extends Notifier<AppPalette> {
+  static const _primaryKey = 'palette_primary';
+  static const _accentKey = 'palette_accent';
+
+  @override
+  AppPalette build() {
+    _load();
+    return AppPalette.standard;
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final primary = PrimaryChoice.values.where((p) => p.name == prefs.getString(_primaryKey)).firstOrNull;
+      if (primary == null) return;
+      final accent = AccentChoice.values.where((a) => a.name == prefs.getString(_accentKey)).firstOrNull;
+      state = AppPalette(primary, accent ?? primary.accents.first);
+    } catch (_) {
+      // Ohne gespeicherte Auswahl bleibt es beim Standard.
+    }
+  }
+
+  /// Neue Hauptfarbe: Akzent bleibt, wenn er dazu passt, sonst der passende Standard.
+  Future<void> setPrimary(PrimaryChoice primary) =>
+      _save(AppPalette(primary, primary.accents.contains(state.accent) ? state.accent : primary.accents.first));
+
+  Future<void> setAccent(AccentChoice accent) => _save(AppPalette(state.primary, accent));
+
+  Future<void> _save(AppPalette palette) async {
+    state = palette;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_primaryKey, palette.primary.name);
+    await prefs.setString(_accentKey, palette.accent.name);
+  }
+}
 
 final themeModeProvider = NotifierProvider<ThemeModeSetting, ThemeMode>(ThemeModeSetting.new);
 

@@ -17,6 +17,7 @@ import '../food/recipe_screen.dart';
 import '../info/info_screen.dart';
 import '../onboarding/profile_form_screen.dart';
 import '../weight/scale_actions.dart';
+import 'appearance_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -26,6 +27,7 @@ class SettingsScreen extends ConsumerWidget {
     final profile = ref.watch(profileProvider).value;
     final targets = ref.watch(targetsProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final palette = ref.watch(paletteProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Einstellungen')),
       body: ListView(
@@ -64,20 +66,19 @@ class SettingsScreen extends ConsumerWidget {
           const ListTile(title: Text('Erinnerungen')),
           for (final kind in ReminderKind.values) _ReminderTile(kind),
           const Divider(),
-          const ListTile(title: Text('Darstellung')),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SegmentedButton<ThemeMode>(
-              segments: const [
-                ButtonSegment(value: ThemeMode.system, label: Text('System')),
-                ButtonSegment(value: ThemeMode.light, label: Text('Hell')),
-                ButtonSegment(value: ThemeMode.dark, label: Text('Dunkel')),
-              ],
-              selected: {themeMode},
-              onSelectionChanged: (m) => ref.read(themeModeProvider.notifier).set(m.single),
+          ListTile(
+            leading: const Icon(Icons.palette_outlined),
+            title: const Text('Darstellung'),
+            subtitle: Text(
+              '${palette.primary.label} · ${palette.accent.label} · ${switch (themeMode) {
+                ThemeMode.light => 'Hell',
+                ThemeMode.dark => 'Dunkel',
+                ThemeMode.system => 'System',
+              }}',
             ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AppearanceScreen())),
           ),
-          const SizedBox(height: 8),
           const Divider(),
           const _DonationTile(),
           const Divider(),
