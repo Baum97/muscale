@@ -214,6 +214,8 @@ Stand: ✅ umgesetzt · ⬜ offen
 - ✅ Check-in mit gemessenem Bedarf (Kapitel 7)
 - ✅ Export/Import (JSON) als Datensicherung
 - ✅ Waage über Health Connect (Kapitel 8)
+- ✅ Farbwahl (Haupt- + Akzentfarbe) und neues Design
+- ✅ Homescreen-Widget mit Kalorien/Eiweiß und Scan-Knopf
 - ⬜ Grundnahrungsmittel aus dem BLS 4.0 (Datei muss noch ins Repo, siehe Kapitel 13)
 - ✅ Favoriten
 - ✅ CSV-Export (Tagebuch, Gewicht; Excel-tauglich)
@@ -244,7 +246,8 @@ Stand: ✅ umgesetzt · ⬜ offen
 | Benachrichtigungen | lokal (`flutter_local_notifications`), kein FCM |
 | Backend | keins |
 | Vertrieb | Google Play (Dev-Account vorhanden) + F-Droid, zwei Build-Varianten (Kapitel 11) |
-| Design | Light Mode und Dark Mode (folgt der Systemeinstellung, manuell umschaltbar) |
+| Design | Hell/Dunkel/System; Hauptfarbe (Dunkelrot, Oliv, Schwarz, Blau, Weiß) + je 4 passende Akzentfarben; Schrift Manrope (OFL, eingebettet) |
+| Homescreen-Widget | `home_widget`: kcal übrig, kcal und Eiweiß gegessen/Ziel, Scan-Knopf (öffnet direkt den Scanner) |
 | Lizenz | GPL-3.0 + kommerzielle Lizenz (Dual Licensing, Kapitel 11) |
 
 ## 11. Finanzierung
@@ -323,4 +326,5 @@ Falls Werbung jemals kommt, gilt ohne Ausnahme:
 - [ ] openScale-Schnittstelle prüfen
 - [ ] Play-Variante: Trinkgeld-Produkte anlegen, aktuelle Gebühren prüfen
 - [ ] Text der kommerziellen Lizenz + CLA (anwaltlich prüfen lassen)
-- [ ] App-Icon, Farben (Light + Dark Mode)
+- [x] Farben (Light + Dark Mode, wählbar)
+- [ ] App-Icon

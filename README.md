@@ -16,6 +16,8 @@ Stand: Grundgerüst · Android zuerst (Google Play + F-Droid)
 - Eiweiß, Kohlenhydrate (Zucker / Stärke / Ballaststoffe), Fett (gesättigt / ungesättigt)
 - Startschätzung aus Größe, Alter, Geschlecht, Gewicht und Aktivität
 - Nach 14 Tagen Tracking: gemessener Bedarf aus Ø Kalorien und Gewichtstrend
+- Homescreen-Widget mit Kalorien, Eiweiß und Scan-Knopf
+- Farben wählbar: Dunkelrot, Oliv, Schwarz, Blau, Weiß – mit passender Akzentfarbe
 - Alle Daten bleiben auf dem Gerät
 
 ## Lizenz
