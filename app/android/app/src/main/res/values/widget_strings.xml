@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">Kalorien und Eiweiß von heute auf einen Blick – mit Scan-Knopf</string>
+    <string name="widget_title">Heute</string>
+    <string name="widget_scan">Barcode scannen</string>
+</resources>

@@ -53,7 +53,7 @@ class TodayScreen extends ConsumerWidget {
         onPressed: () async {
           final food = await scanAndLookup(context, ref);
           if (food != null && context.mounted) {
-            await showAmountSheet(context, food: food, day: key, meal: _mealForNow());
+            await showAmountSheet(context, food: food, day: key, meal: mealForNow());
           }
         },
       ),
@@ -80,7 +80,8 @@ class TodayScreen extends ConsumerWidget {
   }
 }
 
-Meal _mealForNow() {
+/// Mahlzeit passend zur Uhrzeit (für Scans ohne gewählte Mahlzeit).
+Meal mealForNow() {
   final hour = DateTime.now().hour;
   if (hour < 11) return Meal.breakfast;
   if (hour < 15) return Meal.lunch;

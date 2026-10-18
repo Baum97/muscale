@@ -6,7 +6,21 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:muscale/app.dart';
 import 'package:muscale/data/database.dart';
 import 'package:muscale/providers.dart';
+import 'package:muscale/services/home_widget_sync.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class FakeHomeWidget implements HomeWidgetBridge {
+  final published = <WidgetSnapshot>[];
+
+  @override
+  Future<void> publish(WidgetSnapshot snapshot) async => published.add(snapshot);
+
+  @override
+  Future<Uri?> initialLaunch() async => null;
+
+  @override
+  Stream<Uri?> get clicks => const Stream.empty();
+}
 
 void main() {
   setUpAll(() => initializeDateFormatting('de'));
@@ -14,8 +28,12 @@ void main() {
   testWidgets('Onboarding → Tagebuch mit Startschätzung', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final db = AppDatabase(NativeDatabase.memory());
+    final homeWidget = FakeHomeWidget();
     await tester.pumpWidget(
-      ProviderScope(overrides: [databaseProvider.overrideWith((ref) => db)], child: const MuScaleApp()),
+      ProviderScope(
+        overrides: [databaseProvider.overrideWith((ref) => db), homeWidgetProvider.overrideWithValue(homeWidget)],
+        child: const MuScaleApp(),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text('Willkommen bei MuScale'), findsOneWidget);
@@ -36,6 +54,9 @@ void main() {
     expect(find.text('2.840 kcal'), findsOneWidget);
     expect(find.text('kcal übrig'), findsOneWidget);
     expect(find.text('Startschätzung'), findsOneWidget);
+    // Das Homescreen-Widget bekommt Ziel und (noch leeren) Tag.
+    expect(homeWidget.published.last.kcalTarget, 2840);
+    expect(homeWidget.published.last.kcalEaten, 0);
     final weights = await tester.runAsync(() => db.select(db.weightEntries).get());
     expect(weights!.single.kg, 85);
 

@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'data/database.dart';
 import 'data/open_food_facts.dart';
 import 'data/scale_sync.dart';
+import 'domain/nutrients.dart';
+import 'services/home_widget_sync.dart';
 import 'services/reminders.dart';
 import 'theme.dart';
 import 'domain/days.dart';
@@ -57,6 +59,8 @@ class SelectedDay extends Notifier<DateTime> {
     final next = state.add(Duration(days: days));
     if (!next.isAfter(today())) state = next;
   }
+
+  void showToday() => state = today();
 }
 
 final dayEntriesProvider = StreamProvider.family<List<EntryWithFood>, String>(
@@ -284,3 +288,21 @@ class RemindersSetting extends Notifier<Map<ReminderKind, ReminderSetting>> {
     return true;
   }
 }
+
+// Homescreen-Widget
+
+final homeWidgetProvider = Provider<HomeWidgetBridge>((ref) => AndroidHomeWidget());
+
+/// Stand fürs Widget: immer der heutige Tag, unabhängig vom angezeigten Tag im Tagebuch.
+final widgetSnapshotProvider = Provider<WidgetSnapshot?>((ref) {
+  final day = today();
+  final entries = ref.watch(dayEntriesProvider(dayKey(day))).value;
+  final targets = ref.watch(targetsProvider);
+  if (entries == null || targets == null) return null;
+  return widgetSnapshot(
+    day: day,
+    totals: NutrientTotals.of(entries.map((e) => e.nutrients)),
+    targets: targets,
+    palette: ref.watch(paletteProvider),
+  );
+});

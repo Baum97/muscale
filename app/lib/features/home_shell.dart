@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../domain/days.dart';
 import '../providers.dart';
+import '../services/home_widget_sync.dart';
+import 'food/add_food.dart';
 import 'settings/settings_screen.dart';
 import 'today/today_screen.dart';
 import 'weight/scale_actions.dart';
@@ -17,6 +22,7 @@ class HomeShell extends ConsumerStatefulWidget {
 class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
   late final AppLifecycleListener _lifecycle;
+  StreamSubscription<Uri?>? _widgetClicks;
 
   @override
   void initState() {
@@ -28,12 +34,33 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     _lifecycle = AppLifecycleListener(onResume: () => syncScale(context, ref, quiet: true));
     // Erinnerungen laden und neu einplanen.
     ref.read(remindersProvider);
+
+    // Homescreen-Widget: Werte bei jeder Änderung übergeben, Scan-Knopf auswerten.
+    final widget = ref.read(homeWidgetProvider);
+    ref.listenManual(widgetSnapshotProvider, (previous, next) {
+      if (next != null && next != previous) widget.publish(next).catchError((_) {});
+    }, fireImmediately: true);
+    widget.initialLaunch().then(_onWidgetLink, onError: (_) {});
+    _widgetClicks = widget.clicks.listen(_onWidgetLink, onError: (_) {});
   }
 
   @override
   void dispose() {
     _lifecycle.dispose();
+    _widgetClicks?.cancel();
     super.dispose();
+  }
+
+  /// Scan-Knopf im Widget: Tagebuch von heute zeigen und direkt den Scanner öffnen.
+  Future<void> _onWidgetLink(Uri? uri) async {
+    if (!mounted || uri == null) return;
+    setState(() => _index = 0);
+    ref.read(selectedDayProvider.notifier).showToday();
+    if (!isScanLink(uri)) return;
+    final food = await scanAndLookup(context, ref);
+    if (food != null && mounted) {
+      await showAmountSheet(context, food: food, day: dayKey(today()), meal: mealForNow());
+    }
   }
 
   @override

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_background">#FF1C1B1F</color>
+    <color name="widget_text">#FFF2F0F4</color>
+    <color name="widget_text_secondary">#FFC4C2CA</color>
+    <color name="widget_track">#FF34333A</color>
+    <color name="widget_button">#FF2C2B31</color>
+    <color name="widget_primary">#FFD02F45</color>
+    <color name="widget_protein">#FF3987E5</color>
+</resources>
