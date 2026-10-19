@@ -43,7 +43,7 @@ class LocalReminderScheduler implements ReminderScheduler {
       tz.setLocalLocation(tz.getLocation('Europe/Berlin'));
     }
     await _plugin.initialize(
-      settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+      settings: const InitializationSettings(android: AndroidInitializationSettings('ic_notification')),
     );
   }();
 

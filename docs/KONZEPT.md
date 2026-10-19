@@ -327,4 +327,4 @@ Falls Werbung jemals kommt, gilt ohne Ausnahme:
 - [ ] Play-Variante: Trinkgeld-Produkte anlegen, aktuelle Gebühren prüfen
 - [ ] Text der kommerziellen Lizenz + CLA (anwaltlich prüfen lassen)
 - [x] Farben (Light + Dark Mode, wählbar)
-- [ ] App-Icon
+- [x] App-Icon: „Ring-M“ in Waldgrün/Gold (`docs/branding/`)

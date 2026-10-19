@@ -120,6 +120,15 @@ class _ProfileFormScreenState extends ConsumerState<ProfileFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (widget.onboarding) ...[
+              Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: Image.asset('assets/branding/logo.png', width: 88, height: 88),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             if (widget.onboarding)
               const Padding(
                 padding: EdgeInsets.only(bottom: 16),
