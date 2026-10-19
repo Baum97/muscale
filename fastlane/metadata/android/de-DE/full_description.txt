@@ -1,0 +1,38 @@
+MuScale ist ein kostenloser Kalorien- und Makrozähler für Kraftsportler – ohne Konto, ohne Werbung, ohne Tracking. Alle Daten bleiben auf deinem Gerät.
+
+<b>Dein echter Bedarf statt einer Schätzung</b>
+Zu Beginn schätzt MuScale deinen Kalorienbedarf aus Größe, Alter, Geschlecht, Gewicht und Aktivität. Nach 14 Tagen Tracking misst die App ihn: Sie vergleicht, was du gegessen hast, mit deinem Gewichtsverlauf. Nimmst du langsamer ab oder zu als gewünscht, schlägt MuScale ein neues Tagesziel vor – in kleinen Schritten und nur mit deiner Bestätigung.
+
+<b>Makros im Detail</b>
+• Eiweiß, Kohlenhydrate und Fett mit Tageszielen für Kraftsport (Eiweiß pro kg Körpergewicht einstellbar)
+• Kohlenhydrate aufgeteilt in Zucker (kurzkettig), Stärke (langkettig) und Ballaststoffe
+• Fett aufgeteilt in gesättigte und ungesättigte Fettsäuren
+• Berechnete Werte sind ehrlich mit „≈“ gekennzeichnet
+
+<b>Schnell eintragen</b>
+• Barcode scannen – Produktdaten von Open Food Facts
+• Suche nach Namen, Favoriten, „Zuletzt gegessen“
+• Mengen per Schnellauswahl: 1 Portion, 50 g, 100 g, 150 g oder übliche Getränkegrößen
+• Eigene Lebensmittel und Rezepte mit Portionen und Gewicht nach dem Kochen
+
+<b>Gewicht und Trend</b>
+• Gewichtsverlauf mit geglättetem Trend – Wasserschwankungen fallen nicht ins Gewicht
+• Smarte Waage über Health Connect (z. B. Withings, Garmin, Renpho, Zepp) – nur lesend
+• Erinnerungen ans Wiegen und ans Abschließen des Tages
+
+<b>Homescreen-Widget</b>
+Kalorien und Eiweiß von heute auf einen Blick – mit Knopf, der direkt den Barcode-Scanner öffnet.
+
+<b>Dein Look</b>
+Hell oder dunkel, Hauptfarbe Waldgrün, Dunkelrot, Oliv, Schwarz, Blau oder Weiß – jeweils mit passender Akzentfarbe.
+
+<b>Deine Daten gehören dir</b>
+• Kein Konto, kein Server, keine Werbung, keine Analyse-Werkzeuge
+• Ins Internet geht nur der Barcode bzw. Suchbegriff an Open Food Facts
+• Datensicherung als Datei, Tagebuch und Gewicht als CSV für Excel
+
+<b>Frei und offen</b>
+MuScale ist Open Source (GPL-3.0) und finanziert sich nur über freiwillige Spenden.
+Quellcode: https://github.com/Baum97/muscale
+
+Hinweis: MuScale gibt allgemeine Richtwerte für gesunde Erwachsene und ersetzt keine medizinische oder ernährungstherapeutische Beratung.

@@ -46,6 +46,14 @@ void main() {
       expect(portionOptions(isLiquid: false, servingSize: 30).map((p) => p.amount), [30, 50, 100, 150]);
     });
 
+    test('Portion gleich einer festen Menge erscheint nur einmal', () {
+      expect(portionOptions(isLiquid: false, servingSize: 150).map((p) => p.label), [
+        '1 Portion · 150 g',
+        '50 g',
+        '100 g',
+      ]);
+    });
+
     test('Feste Lebensmittel ohne Portionsangabe', () {
       expect(portionOptions(isLiquid: false).map((p) => p.amount), [50, 100, 150]);
     });

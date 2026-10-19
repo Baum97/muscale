@@ -5,10 +5,11 @@ aus Essen und Gewichtstrend misst. Ohne Konto, ohne Werbung, ohne Tracking, ohne
 
 [![CI](https://github.com/Baum97/muscale/actions/workflows/ci.yml/badge.svg)](https://github.com/Baum97/muscale/actions/workflows/ci.yml)
 
-Stand: Grundgerüst · Android zuerst (Google Play + F-Droid)
+Stand: Version 1.0 in Vorbereitung · Android (Google Play + F-Droid)
 
 - **Konzept & Entscheidungen:** [`docs/KONZEPT.md`](docs/KONZEPT.md)
 - **App (Flutter):** [`app/`](app/README.md)
+- **Veröffentlichung (Play Store, F-Droid):** [`docs/VEROEFFENTLICHUNG.md`](docs/VEROEFFENTLICHUNG.md)
 
 ## Kurz
 

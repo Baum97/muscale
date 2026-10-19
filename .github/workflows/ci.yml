@@ -32,6 +32,13 @@ jobs:
       - run: flutter analyze
       - run: flutter test
 
+  scripts:
+    name: Shell-Skripte (shellcheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: shellcheck scripts/*.sh
+
   android:
     name: Android-Build (${{ matrix.flavor }})
     needs: app
@@ -54,6 +61,10 @@ jobs:
           channel: stable
           cache: true
       - run: flutter build apk --debug --flavor ${{ matrix.flavor }}
+      - name: Kein Google-Code in der F-Droid-Variante
+        if: matrix.flavor == 'fdroid'
+        working-directory: .
+        run: scripts/check-fdroid-apk.sh app/build/app/outputs/flutter-apk/app-fdroid-debug.apk
       - uses: actions/upload-artifact@v4
         with:
           name: muscale-${{ matrix.flavor }}-debug-apk

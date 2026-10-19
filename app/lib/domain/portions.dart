@@ -27,7 +27,9 @@ List<PortionOption> portionOptions({required bool isLiquid, double? servingSize}
   if (isLiquid) return drinkSizes;
   return [
     if (servingSize != null && servingSize > 0) PortionOption('1 Portion · ${_fmt(servingSize)} g', servingSize),
-    for (final g in solidAmounts) PortionOption('${_fmt(g)} g', g),
+    // Feste Mengen, die der Portion entsprechen, nicht doppelt anbieten.
+    for (final g in solidAmounts)
+      if (g != servingSize) PortionOption('${_fmt(g)} g', g),
   ];
 }
 

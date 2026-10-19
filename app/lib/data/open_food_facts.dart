@@ -11,7 +11,7 @@ class OpenFoodFacts {
 
   final http.Client _client;
 
-  static const userAgent = 'MuScale/0.1 (https://github.com/Baum97/muscale)';
+  static const userAgent = 'MuScale/1.0 (https://github.com/Baum97/muscale)';
   static const _fields =
       'code,product_name,product_name_de,brands,quantity,product_quantity_unit,serving_quantity,nutriments';
 

@@ -1,0 +1,48 @@
+# ENTWURF für fdroiddata (metadata/app.muscale.muscale.yml) – siehe docs/VEROEFFENTLICHUNG.md, Kapitel 5.
+# Muss beim ersten F-Droid-Testbuild noch angepasst werden (v. a. sqlite3 aus dem Quellcode).
+Categories:
+  - Sports & Health
+License: GPL-3.0-only
+AuthorName: '[Vorname Nachname]'
+SourceCode: https://github.com/Baum97/muscale
+IssueTracker: https://github.com/Baum97/muscale/issues
+Changelog: https://github.com/Baum97/muscale/releases
+
+AutoName: MuScale
+
+RepoType: git
+Repo: https://github.com/Baum97/muscale.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: v1.0.0
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@3.47.7
+      - sqlite@version-3.50.4
+    rm:
+      - app/ios
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      # SQLite aus dem Quellcode statt vorkompiliert (Amalgamation aus dem srclib erzeugen)
+      - pushd $$sqlite$$ && ./configure && make sqlite3.c && popd
+      - cp $$sqlite$$/sqlite3.c android/sqlite3.c
+      - printf '\nhooks:\n  user_defines:\n    sqlite3:\n      source: source\n      path: android/sqlite3.c\n'
+        >> pubspec.yaml
+      - $$flutter$$/bin/flutter pub get
+    scanignore:
+      - app/.pub-cache
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid
+    ndk: r28c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1

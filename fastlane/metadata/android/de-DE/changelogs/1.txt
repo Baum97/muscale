@@ -1,0 +1,1 @@
+Erste Version: Tagebuch mit Barcode-Scanner, Makros im Detail, gemessener Kalorienbedarf nach 14 Tagen, Gewichtstrend, Rezepte, Homescreen-Widget, Waage über Health Connect, Farbwahl.

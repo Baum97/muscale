@@ -324,7 +324,11 @@ Falls Werbung jemals kommt, gilt ohne Ausnahme:
 - [x] Datenschutzerklärung (Entwurf): `app/assets/legal/datenschutz.md` – in der App unter Einstellungen → Datenschutz
 - [x] Impressum (Entwurf): `app/assets/legal/impressum.md`, Anleitung in `docs/IMPRESSUM.md`
 - [ ] Datenschutzerklärung und Impressum: Name, Anschrift, E-Mail, Telefon, Aufsichtsbehörde eintragen; rechtlich prüfen lassen
-- [ ] Google Play: Health-Connect-Berechtigung in der Play Console deklarieren, Datenschutz-URL hinterlegen
+- [x] Release-Vorbereitung: Signierung, Release-Workflow, Store-Texte und -Bilder, F-Droid-Rezept (`docs/VEROEFFENTLICHUNG.md`)
+- [ ] Test auf echtem Gerät
+- [ ] Upload-Schlüssel erzeugen, GitHub-Secrets anlegen
+- [ ] Google Play: App anlegen, App-Inhalte (Datensicherheit, Health Connect, Gesundheits-Apps), geschlossener Test
+- [ ] F-Droid: Merge Request bei fdroiddata
 - [ ] Health Connect: F-Droid-Tauglichkeit des Client-Pakets prüfen
 - [ ] openScale-Schnittstelle prüfen
 - [ ] Play-Variante: Trinkgeld-Produkte anlegen, aktuelle Gebühren prüfen

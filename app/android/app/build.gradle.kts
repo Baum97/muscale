@@ -1,8 +1,23 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+// Upload-Schlüssel für Google Play: lokal aus android/key.properties, in der CI aus Umgebungsvariablen
+// (GitHub-Secrets). Fehlt beides, bleibt der Release-Build unsigniert – so baut auch F-Droid, das selbst signiert.
+// Anleitung: docs/VEROEFFENTLICHUNG.md
+val keyProperties = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
+fun signingValue(property: String, env: String): String? =
+    keyProperties.getProperty(property) ?: System.getenv(env)
+
+val uploadStoreFile = signingValue("storeFile", "MUSCALE_KEYSTORE_PATH")
 
 android {
     namespace = "app.muscale.muscale"
@@ -41,12 +56,27 @@ android {
         }
     }
 
+    signingConfigs {
+        if (uploadStoreFile != null) {
+            create("upload") {
+                storeFile = file(uploadStoreFile)
+                storePassword = signingValue("storePassword", "MUSCALE_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "MUSCALE_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "MUSCALE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (uploadStoreFile != null) signingConfigs.getByName("upload") else null
         }
+    }
+
+    // F-Droid: keine Google-eigenen Abhängigkeits-Metadaten (verschlüsselter Block, den nur Google lesen kann).
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 }
 
