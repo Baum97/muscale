@@ -80,7 +80,8 @@ Dann `~/.muscale/keystore.base64.txt` löschen.
    ```
 4. GitHub Actions → „Release“ läuft. Ergebnis (Artefakt `muscale-release`):
    - `muscale-1.0.0-play.aab` → für Google Play
-   - `muscale-1.0.0.apk` → hängt zusätzlich am GitHub-Release (für Leute ohne Store)
+   - `muscale-1.0.0-arm64-v8a.apk` (fast alle Handys), `…-armeabi-v7a.apk` (alte Handys), `…-x86_64.apk`
+     (Emulatoren) → hängen zusätzlich am GitHub-Release (für Leute ohne Store)
 
 Ohne die Secrets entstehen unsignierte Pakete – Google Play lehnt die ab.
 

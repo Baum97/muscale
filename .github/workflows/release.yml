@@ -51,11 +51,14 @@ jobs:
         run: |
           flutter pub get
           flutter build appbundle --release --flavor play
-          flutter build apk --release --flavor fdroid
+          # Je Prozessortyp eine kleine APK (statt einer großen für alle) – fast alle Handys brauchen arm64.
+          flutter build apk --release --flavor fdroid --split-per-abi
           mkdir -p ../release
           version=$(grep '^version:' pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)
           cp build/app/outputs/bundle/playRelease/app-play-release.aab "../release/muscale-$version-play.aab"
-          cp build/app/outputs/flutter-apk/app-fdroid-release.apk "../release/muscale-$version.apk"
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            cp "build/app/outputs/flutter-apk/app-$abi-fdroid-release.apk" "../release/muscale-$version-$abi.apk"
+          done
           ls -la ../release
       - name: Kein Google-Code in der F-Droid-Variante
         working-directory: .
