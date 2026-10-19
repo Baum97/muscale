@@ -15,6 +15,7 @@ import '../../services/reminders.dart';
 import '../../widgets/format.dart';
 import '../food/recipe_screen.dart';
 import '../info/info_screen.dart';
+import '../legal/privacy_screen.dart';
 import '../onboarding/profile_form_screen.dart';
 import '../weight/scale_actions.dart';
 import 'appearance_screen.dart';
@@ -127,13 +128,12 @@ class SettingsScreen extends ConsumerWidget {
               subtitle: const Text('Freie Datenbank unter der Open Database License (ODbL)'),
               onTap: () => launchUrl(Uri.parse(openFoodFactsUrl), mode: LaunchMode.externalApplication),
             ),
-            const ListTile(
-              leading: Icon(Icons.lock_outline),
-              title: Text('Datenschutz'),
-              subtitle: Text(
-                'Alle Daten bleiben auf diesem Gerät. Ins Internet geht nur der gescannte Barcode '
-                '(an Open Food Facts). Kein Konto, kein Tracking, keine Werbung.',
-              ),
+            ListTile(
+              leading: const Icon(Icons.lock_outline),
+              title: const Text('Datenschutz'),
+              subtitle: const Text('Alle Daten bleiben auf diesem Gerät. Kein Konto, kein Tracking, keine Werbung.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PrivacyScreen())),
             ),
             const AboutListTile(
               icon: Icon(Icons.info_outline),

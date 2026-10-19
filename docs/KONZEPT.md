@@ -321,7 +321,9 @@ Falls Werbung jemals kommt, gilt ohne Ausnahme:
 
 - [x] BLS 4.0: CC BY 4.0 – Nutzung in der App erlaubt, Quellenangabe „Max Rubner-Institut (2025): Bundeslebensmittelschlüssel (BLS), Version 4.0“
 - [ ] BLS-Datei (`BLS_4_0_Daten_2025_DE.xlsx`) ins Repo unter `data/bls/` legen → Import in die App
-- [ ] Google Play: Health-Connect-Berechtigung in der Play Console deklarieren (Datenschutzerklärung nötig)
+- [x] Datenschutzerklärung (Entwurf): `app/assets/legal/datenschutz.md` – in der App unter Einstellungen → Datenschutz
+- [ ] Datenschutzerklärung: Name, Anschrift, E-Mail, Aufsichtsbehörde eintragen; rechtlich prüfen lassen
+- [ ] Google Play: Health-Connect-Berechtigung in der Play Console deklarieren, Datenschutz-URL hinterlegen
 - [ ] Health Connect: F-Droid-Tauglichkeit des Client-Pakets prüfen
 - [ ] openScale-Schnittstelle prüfen
 - [ ] Play-Variante: Trinkgeld-Produkte anlegen, aktuelle Gebühren prüfen

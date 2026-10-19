@@ -150,7 +150,7 @@ class _ProfileFormScreenState extends ConsumerState<ProfileFormScreen> {
                     controller: _age,
                     decoration: const InputDecoration(labelText: 'Alter', suffixText: 'Jahre'),
                     keyboardType: TextInputType.number,
-                    validator: (t) => _range(t, 14, 100, 'Jahren'),
+                    validator: (t) => _range(t, 16, 100, 'Jahren'),
                   ),
                 ),
                 const SizedBox(width: 12),
