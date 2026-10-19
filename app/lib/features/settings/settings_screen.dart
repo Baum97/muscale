@@ -15,7 +15,7 @@ import '../../services/reminders.dart';
 import '../../widgets/format.dart';
 import '../food/recipe_screen.dart';
 import '../info/info_screen.dart';
-import '../legal/privacy_screen.dart';
+import '../legal/legal_text_screen.dart';
 import '../onboarding/profile_form_screen.dart';
 import '../weight/scale_actions.dart';
 import 'appearance_screen.dart';
@@ -133,7 +133,15 @@ class SettingsScreen extends ConsumerWidget {
               title: const Text('Datenschutz'),
               subtitle: const Text('Alle Daten bleiben auf diesem Gerät. Kein Konto, kein Tracking, keine Werbung.'),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PrivacyScreen())),
+              onTap: () =>
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LegalTextScreen.privacy())),
+            ),
+            ListTile(
+              leading: const Icon(Icons.gavel_outlined),
+              title: const Text('Impressum'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () =>
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LegalTextScreen.imprint())),
             ),
             const AboutListTile(
               icon: Icon(Icons.info_outline),

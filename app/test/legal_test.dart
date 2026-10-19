@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muscale/features/legal/privacy_screen.dart';
+import 'package:muscale/features/legal/legal_text_screen.dart';
 
 void main() {
   final source = File(privacyAsset).readAsStringSync();
@@ -27,8 +27,16 @@ void main() {
     }
   });
 
+  test('Impressum enthält die Pflichtangaben', () {
+    final imprint = File(imprintAsset).readAsStringSync();
+    for (final part in ['§ 5 DDG', 'E-Mail', 'Telefon', '§ 18 Abs. 2 MStV', 'Open Food Facts']) {
+      expect(imprint, contains(part), reason: part);
+    }
+    expect(imprint, isNot(contains('ec.europa.eu/consumers/odr')), reason: 'OS-Plattform ist abgeschaltet');
+  });
+
   testWidgets('Bildschirm zeigt die Erklärung und den Entwurfs-Hinweis', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: PrivacyScreen(bundle: _StringBundle(source))));
+    await tester.pumpWidget(MaterialApp(home: LegalTextScreen.privacy(bundle: _StringBundle(source))));
     await tester.pumpAndSettle();
     expect(find.text('Datenschutzerklärung für MuScale'), findsOneWidget);
     expect(find.textContaining('Entwurf'), findsOneWidget);

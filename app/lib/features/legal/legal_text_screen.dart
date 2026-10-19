@@ -2,10 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 const privacyAsset = 'assets/legal/datenschutz.md';
+const imprintAsset = 'assets/legal/impressum.md';
 
-/// Zeigt die Datenschutzerklärung aus [privacyAsset] – dieselbe Datei, auf die der Store-Eintrag verlinkt.
-class PrivacyScreen extends StatelessWidget {
-  const PrivacyScreen({super.key, this.bundle});
+/// Zeigt einen Rechtstext (Datenschutzerklärung, Impressum) aus den App-Dateien – dieselben Dateien, auf die
+/// die Store-Einträge verlinken.
+class LegalTextScreen extends StatelessWidget {
+  const LegalTextScreen({super.key, required this.title, required this.asset, this.bundle});
+
+  const LegalTextScreen.privacy({Key? key, AssetBundle? bundle})
+    : this(key: key, title: 'Datenschutz', asset: privacyAsset, bundle: bundle);
+
+  const LegalTextScreen.imprint({Key? key, AssetBundle? bundle})
+    : this(key: key, title: 'Impressum', asset: imprintAsset, bundle: bundle);
+
+  final String title;
+  final String asset;
 
   /// Für Tests austauschbar.
   final AssetBundle? bundle;
@@ -13,9 +24,9 @@ class PrivacyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Datenschutz')),
+      appBar: AppBar(title: Text(title)),
       body: FutureBuilder<String>(
-        future: (bundle ?? rootBundle).loadString(privacyAsset),
+        future: (bundle ?? rootBundle).loadString(asset),
         builder: (context, snapshot) {
           final text = snapshot.data;
           if (text == null) return const Center(child: CircularProgressIndicator());

@@ -38,6 +38,7 @@ flutter:
   assets:
     - assets/branding/logo.png
     - assets/legal/datenschutz.md
+    - assets/legal/impressum.md
   fonts:
     - family: Manrope
       fonts:
