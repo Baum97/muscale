@@ -246,7 +246,7 @@ Stand: ✅ umgesetzt · ⬜ offen
 | Benachrichtigungen | lokal (`flutter_local_notifications`), kein FCM |
 | Backend | keins |
 | Vertrieb | Google Play (Dev-Account vorhanden) + F-Droid, zwei Build-Varianten (Kapitel 11) |
-| Design | Hell/Dunkel/System; Hauptfarbe (Dunkelrot, Oliv, Schwarz, Blau, Weiß) + je 4 passende Akzentfarben; Schrift Manrope (OFL, eingebettet) |
+| Design | Hell/Dunkel/System; Hauptfarbe (Waldgrün = Standard passend zum Logo, Dunkelrot, Oliv, Schwarz, Blau, Weiß) + je 4 passende Akzentfarben; Schrift Manrope (OFL, eingebettet) |
 | Homescreen-Widget | `home_widget`: kcal übrig, kcal und Eiweiß gegessen/Ziel, Scan-Knopf (öffnet direkt den Scanner) |
 | Lizenz | GPL-3.0 + kommerzielle Lizenz (Dual Licensing, Kapitel 11) |
 

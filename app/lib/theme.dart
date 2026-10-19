@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Hauptfarbe der App. Schwarz und Weiß sind einfarbige Looks – die Akzentfarbe bringt dort die Farbe.
 enum PrimaryChoice {
+  forest('Waldgrün', Color(0xFF1F4D3A)),
   darkRed('Dunkelrot', Color(0xFF8C1C2B)),
   olive('Oliv', Color(0xFF5B6B2F)),
   black('Schwarz', Color(0xFF111111)),
@@ -18,6 +19,7 @@ enum PrimaryChoice {
 
   /// Zu jeder Hauptfarbe passende Akzentfarben; die erste ist der Standard.
   List<AccentChoice> get accents => switch (this) {
+    forest => const [AccentChoice.gold, AccentChoice.cream, AccentChoice.terracotta, AccentChoice.mint],
     darkRed => const [AccentChoice.gold, AccentChoice.sand, AccentChoice.sage, AccentChoice.graphite],
     olive => const [AccentChoice.terracotta, AccentChoice.mustard, AccentChoice.cream, AccentChoice.sand],
     black => const [AccentChoice.gold, AccentChoice.signalRed, AccentChoice.iceBlue, AccentChoice.mint],
@@ -28,7 +30,7 @@ enum PrimaryChoice {
 
 /// Akzentfarbe: Navigationsleiste, Hervorhebungen, Verlauf im Kalorienring.
 enum AccentChoice {
-  gold('Champagner', Color(0xFFC9A54C)),
+  gold('Gold', Color(0xFFC9A54C)),
   sand('Sand', Color(0xFFC8AE8A)),
   sage('Salbei', Color(0xFF7F9C82)),
   graphite('Graphit', Color(0xFF55555C)),
@@ -56,7 +58,8 @@ class AppPalette {
   final PrimaryChoice primary;
   final AccentChoice accent;
 
-  static const standard = AppPalette(PrimaryChoice.darkRed, AccentChoice.gold);
+  /// Passend zum Logo: Waldgrün mit Gold.
+  static const standard = AppPalette(PrimaryChoice.forest, AccentChoice.gold);
 
   @override
   bool operator ==(Object other) => other is AppPalette && other.primary == primary && other.accent == accent;

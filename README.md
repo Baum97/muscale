@@ -17,7 +17,7 @@ Stand: Grundgerüst · Android zuerst (Google Play + F-Droid)
 - Startschätzung aus Größe, Alter, Geschlecht, Gewicht und Aktivität
 - Nach 14 Tagen Tracking: gemessener Bedarf aus Ø Kalorien und Gewichtstrend
 - Homescreen-Widget mit Kalorien, Eiweiß und Scan-Knopf
-- Farben wählbar: Dunkelrot, Oliv, Schwarz, Blau, Weiß – mit passender Akzentfarbe
+- Farben wählbar: Waldgrün (Standard), Dunkelrot, Oliv, Schwarz, Blau, Weiß – mit passender Akzentfarbe
 - Alle Daten bleiben auf dem Gerät
 
 ## Lizenz
