@@ -62,7 +62,7 @@ jobs:
           ls -la ../release
       - name: Kein Google-Code in der F-Droid-Variante
         working-directory: .
-        run: scripts/check-fdroid-apk.sh release/muscale-*.apk
+        run: scripts/check-fdroid-apk.sh release/muscale-*-arm64-v8a.apk  # Java-Code ist in allen APKs gleich
       - uses: actions/upload-artifact@v4
         with:
           name: muscale-release
