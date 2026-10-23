@@ -46,14 +46,24 @@ Fehler bitte als [GitHub-Issue](https://github.com/Baum97/muscale/issues) oder d
 
 ## 2. Upload-Schlüssel erzeugen (einmalig, auf deinem Rechner)
 
-Voraussetzung: ein JDK (z. B. [Temurin 17](https://adoptium.net)).
+Voraussetzung: ein JDK (z. B. [Temurin 17](https://adoptium.net)) oder Android Studio (bringt eins mit).
+
+**Windows** (PowerShell, im Projektordner):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\create-upload-key.ps1
+```
+
+**Linux/macOS:**
 
 ```bash
 scripts/create-upload-key.sh
 ```
 
-Das Skript fragt nach einem Passwort und deinem Namen und legt an:
-- `~/.muscale/muscale-upload.jks` – **sicher aufbewahren** (Passwort-Manager + Backup, z. B. USB-Stick)
+Das Skript fragt nach einem Passwort (mind. 12 Zeichen, keine Umlaute oder Leerzeichen – das unterstützt das
+Schlüsselformat nicht) und deinem Namen und legt an:
+- `~/.muscale/muscale-upload.jks` (Windows: `C:\Users\<du>\.muscale\…`) – **sicher aufbewahren**
+  (Passwort-Manager + Backup, z. B. USB-Stick)
 - `app/android/key.properties` – damit lokale Release-Builds signiert werden (steht in `.gitignore`)
 
 Danach auf GitHub: **Repo → Settings → Secrets and variables → Actions → New repository secret**, vier Secrets:

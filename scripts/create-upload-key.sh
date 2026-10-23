@@ -34,6 +34,11 @@ if [[ ${#password} -lt 12 ]]; then
   echo "Zu kurz." >&2
   exit 1
 fi
+# keytool (PKCS12) akzeptiert nur ASCII-Passwörter.
+if ! LC_ALL=C grep -qx '[!-~]*' <<<"$password"; then
+  echo "Bitte nur Buchstaben a–z/A–Z, Ziffern und Satzzeichen – keine Umlaute oder Leerzeichen." >&2
+  exit 1
+fi
 read -r -s -p "Passwort wiederholen: " again
 echo
 if [[ "$password" != "$again" ]]; then
@@ -49,11 +54,13 @@ keytool -genkeypair -v \
   -dname "CN=$name, O=MuScale, C=DE"
 chmod 600 "$keystore"
 
+# In .properties-Dateien ist \ ein Escape-Zeichen.
+escaped="${password//\\/\\\\}"
 cat > "$properties" <<PROPS
 storeFile=$keystore
-storePassword=$password
+storePassword=$escaped
 keyAlias=$alias
-keyPassword=$password
+keyPassword=$escaped
 PROPS
 chmod 600 "$properties"
 
